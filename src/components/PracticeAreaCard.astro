@@ -1,0 +1,54 @@
+---
+import type { PracticeArea } from '../types/content';
+
+type Props = PracticeArea;
+
+const { mark, title, description, featured = false } = Astro.props;
+---
+
+<article class:list={['area-card', { 'area-card--featured': featured }]}>
+  <span class="area-card__mark">{mark}</span>
+  <h3 class="area-card__title">{title}</h3>
+  <p class="area-card__description">{description}</p>
+</article>
+
+<style>
+  .area-card {
+    padding: 32px 30px;
+    background: var(--navy-900);
+  }
+
+  .area-card__mark {
+    display: block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--gold-300);
+    margin-bottom: 14px;
+  }
+
+  .area-card__title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+  }
+
+  .area-card__description {
+    font-size: 0.98rem;
+    color: var(--cream-dim);
+    margin: 0;
+  }
+
+  .area-card--featured {
+    background: linear-gradient(150deg, var(--gold-500), var(--gold-600));
+    color: var(--ink);
+  }
+
+  .area-card--featured .area-card__mark,
+  .area-card--featured .area-card__title {
+    color: var(--navy-950);
+  }
+
+  .area-card--featured .area-card__description {
+    color: var(--ink-soft);
+  }
+</style>

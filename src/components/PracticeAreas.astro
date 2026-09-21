@@ -1,0 +1,45 @@
+---
+import Accent from './ui/Accent.astro';
+import SectionHeading from './ui/SectionHeading.astro';
+import PracticeAreaCard from './PracticeAreaCard.astro';
+import { practiceAreas } from '../data/practiceAreas';
+---
+
+<section id="atuacao" class="areas">
+  <div class="areas__inner">
+    <SectionHeading eyebrow="Área de atuação">
+      Especialista em soluções de <Accent>dívidas fiscais</Accent>
+    </SectionHeading>
+
+    <div class="areas__grid">
+      {practiceAreas.map((area) => <PracticeAreaCard {...area} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .areas__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    max-width: var(--container-outer-max);
+    margin: 0 auto;
+    padding-inline: var(--container-padding-x);
+  }
+
+  .areas__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  @media (max-width: 700px) {
+    .areas__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

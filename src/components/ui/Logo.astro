@@ -1,0 +1,21 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../../assets/new-logo.jpeg';
+import { siteInfo } from '../../data/site';
+
+interface Props {
+  class?: string;
+  loading?: 'eager' | 'lazy';
+}
+
+const { class: className, loading = 'lazy', ...rest } = Astro.props;
+---
+
+<Image src={logo} alt={siteInfo.logoAlt} class:list={['logo', className]} loading={loading} {...rest} />
+
+<style>
+  .logo {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+</style>

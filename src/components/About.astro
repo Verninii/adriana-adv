@@ -1,0 +1,61 @@
+---
+import Accent from './ui/Accent.astro';
+import SectionHeading from './ui/SectionHeading.astro';
+import Indicator from './Indicator.astro';
+import { siteInfo } from '../data/site';
+import { aboutStats } from '../data/stats';
+---
+
+<section id="sobre" class="about">
+  <div class="about__inner">
+    <SectionHeading eyebrow="Sobre mim">
+      A advocacia tem o poder de <Accent>mudar vidas</Accent>
+    </SectionHeading>
+
+    <div class="about__content">
+      <p class="about__text">
+        {siteInfo.name} é advogada tributarista com atuação estratégica voltada à defesa de
+        empresários e empresas em situações de endividamento fiscal, execuções tributárias e
+        negociações com o Fisco.
+      </p>
+      <p class="about__text">
+        No escritório {siteInfo.name} Advocacia, o foco está primeiro na dor do cliente — não apenas
+        nos honorários, mas no ser humano que precisa deitar no travesseiro e ter o sono tranquilo.
+      </p>
+      <div class="about__stats">
+        {aboutStats.map((stat) => <Indicator {...stat} />)}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about__inner {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 56px;
+    align-items: start;
+    max-width: var(--container-outer-max);
+    margin: 0 auto;
+    padding-inline: var(--container-padding-x);
+  }
+
+  .about__text {
+    font-size: 1.06rem;
+    color: var(--cream-dim);
+    margin: 0 0 18px;
+  }
+
+  .about__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-top: 32px;
+  }
+
+  @media (max-width: 780px) {
+    .about__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

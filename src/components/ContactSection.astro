@@ -1,0 +1,98 @@
+---
+import Button from './ui/Button.astro';
+import Eyebrow from './ui/Eyebrow.astro';
+import { whatsappUrl } from '../data/site';
+---
+
+<section id="contato" class="cta">
+  <div class="cta__inner">
+    <div class="cta__box">
+      <div class="cta__copy">
+        <Eyebrow class="cta__eyebrow">Agende uma consulta</Eyebrow>
+        <h2 class="cta__title">Atendimento em todo o Brasil, na consultoria online</h2>
+        <p class="cta__text">
+          Fale diretamente pelo WhatsApp e explique sua situação fiscal — o retorno é feito com sigilo
+          e atenção individual.
+        </p>
+      </div>
+      <div class="cta__side">
+        <Button href={whatsappUrl} external>Chamar no WhatsApp</Button>
+        <span class="cta__note">Resposta em horário comercial</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    background:
+      radial-gradient(ellipse 700px 400px at 85% 0%, rgba(201, 162, 74, 0.16), transparent 60%),
+      var(--navy-950);
+  }
+
+  .cta__inner {
+    max-width: var(--container-outer-max);
+    margin: 0 auto;
+    padding-inline: var(--container-padding-x);
+  }
+
+  .cta__box {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 40px;
+    align-items: center;
+    padding: 48px;
+    background: var(--navy-900);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+  }
+
+  .cta__eyebrow {
+    margin-bottom: 12px;
+  }
+
+  .cta__title {
+    font-size: clamp(1.8rem, 2vw + 1rem, 2.4rem);
+    margin-bottom: 14px;
+  }
+
+  .cta__text {
+    max-width: 44ch;
+    color: var(--cream-dim);
+    margin: 0;
+  }
+
+  .cta__side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-left: 36px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .cta__note {
+    font-size: 0.82rem;
+    color: var(--cream-dim);
+    text-align: center;
+  }
+
+  @media (max-width: 780px) {
+    .cta__box {
+      grid-template-columns: 1fr;
+      padding: 34px 26px;
+      text-align: center;
+    }
+
+    .cta__text {
+      margin-inline: auto;
+    }
+
+    .cta__side {
+      padding-left: 0;
+      padding-top: 26px;
+      border-left: none;
+      border-top: 1px solid var(--rule);
+    }
+  }
+</style>

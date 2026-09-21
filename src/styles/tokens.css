@@ -1,0 +1,48 @@
+:root {
+  --navy-950: #060f1c;
+  --navy-900: #0b1c33;
+  --navy-800: #132a49;
+  --navy-700: #1c3a60;
+
+  --gold-600: #a9803a;
+  --gold-500: #c9a24a;
+  --gold-300: #e3cf94;
+  --gold-100: #f3e9cd;
+
+  --cream: #f4eee0;
+  --cream-dim: #cdc3ab;
+  --ink: #20180c;
+  --ink-soft: rgba(32, 24, 12, 0.78);
+  --ink-muted: rgba(32, 24, 12, 0.65);
+
+  --rule: rgba(201, 162, 74, 0.35);
+  --header-bg: rgba(6, 15, 28, 0.82);
+
+  --whatsapp: #25d366;
+  --whatsapp-ink: #0b1c15;
+
+  --shadow: 0 24px 60px -24px rgba(6, 15, 28, 0.55);
+  --shadow-photo: 0 34px 74px -18px rgba(0, 0, 0, 0.7);
+  --shadow-gold: 0 14px 30px -12px rgba(201, 162, 74, 0.55);
+  --shadow-gold-hover: 0 18px 36px -12px rgba(201, 162, 74, 0.7);
+  --shadow-fab: 0 16px 32px -10px rgba(0, 0, 0, 0.5);
+  --shadow-fab-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "Jost", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --transition-fast: 180ms ease;
+  --transition-base: 200ms ease;
+
+  --container-max: 1080px;
+  --container-padding-x: max(20px, env(safe-area-inset-left, 0px));
+  --container-outer-max: calc(var(--container-max) + 2 * var(--container-padding-x));
+  --section-padding-y: 76px;
+  --header-offset: 72px;
+}

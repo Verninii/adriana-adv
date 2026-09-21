@@ -1,0 +1,65 @@
+---
+import Logo from './ui/Logo.astro';
+import { footerLinks, siteInfo } from '../data/site';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <Logo class="footer__logo" />
+      <span>
+        © {currentYear} {siteInfo.name} — {siteInfo.tagline}. Todos os direitos reservados.
+      </span>
+    </div>
+    <nav class="footer__links" aria-label="Navegação do rodapé">
+      {footerLinks.map((link) => <a href={link.href} class="footer__link">{link.label}</a>)}
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: 36px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: var(--container-outer-max);
+    margin: 0 auto;
+    padding-inline: var(--container-padding-x);
+    font-size: 0.82rem;
+    color: var(--cream-dim);
+  }
+
+  .footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer__logo {
+    width: 26px;
+    height: 26px;
+  }
+
+  .footer__links {
+    display: flex;
+    gap: 22px;
+  }
+
+  .footer__link {
+    color: var(--cream-dim);
+    transition: color var(--transition-base);
+  }
+
+  .footer__link:hover {
+    color: var(--gold-300);
+  }
+</style>

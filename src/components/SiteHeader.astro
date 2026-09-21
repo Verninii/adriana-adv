@@ -1,0 +1,83 @@
+---
+import Button from './ui/Button.astro';
+import Logo from './ui/Logo.astro';
+import { navLinks, siteInfo, whatsappUrl } from '../data/site';
+---
+
+<header class="header">
+  <div class="header__inner">
+    <a href="/" class="header__brand">
+      <Logo class="header__logo" loading="eager" />
+      <span class="header__name">{siteInfo.name}</span>
+    </a>
+    <nav class="header__nav" aria-label="Navegação principal">
+      {
+        navLinks.map((link) => (
+          <a href={link.href} class="header__link">
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+    <Button href={whatsappUrl} external>Agendar consulta</Button>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 40;
+    background: var(--header-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    max-width: var(--container-outer-max);
+    margin: 0 auto;
+    padding: 14px var(--container-padding-x);
+  }
+
+  .header__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+  }
+
+  .header__logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  .header__nav {
+    display: flex;
+    gap: 28px;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+
+  .header__link {
+    color: var(--cream-dim);
+    transition: color var(--transition-base);
+  }
+
+  .header__link:hover,
+  .header__link:focus-visible {
+    color: var(--gold-300);
+  }
+
+  @media (max-width: 640px) {
+    .header__nav {
+      display: none;
+    }
+  }
+</style>

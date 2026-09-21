@@ -1,0 +1,64 @@
+---
+import { siteInfo } from '../data/site';
+---
+
+<section class="quote">
+  <div class="quote__inner">
+    <blockquote class="quote__block">
+      <span class="quote__mark" aria-hidden="true">&ldquo;</span>
+      <p class="quote__text">
+        No escritório {siteInfo.name} Advocacia, focamos primeiro na dor do cliente — não enxergamos
+        somente honorários, mas o ser humano que precisa deitar no seu travesseiro e ter o seu sono
+        tranquilo.
+      </p>
+      <footer class="quote__author">{siteInfo.name}</footer>
+    </blockquote>
+  </div>
+</section>
+
+<style>
+  .quote {
+    background: linear-gradient(160deg, var(--navy-800), var(--navy-900));
+  }
+
+  .quote__inner {
+    max-width: var(--container-outer-max);
+    margin: 0 auto;
+    padding-inline: var(--container-padding-x);
+  }
+
+  .quote__block {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+    padding-top: 10px;
+    text-align: center;
+  }
+
+  .quote__mark {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 3.4rem;
+    line-height: 0;
+    color: var(--gold-500);
+    margin-bottom: 10px;
+  }
+
+  .quote__text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.25rem, 1.6vw + 1rem, 1.7rem);
+    line-height: 1.5;
+    color: var(--cream);
+    margin: 0 0 22px;
+  }
+
+  .quote__author {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-300);
+  }
+</style>
