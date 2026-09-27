@@ -15,7 +15,11 @@
   --ink-soft: rgba(32, 24, 12, 0.78);
   --ink-muted: rgba(32, 24, 12, 0.65);
 
+  --surface-card: rgba(11, 28, 51, 0.45);
+  --text-soft: #c5ccd8;
+
   --rule: rgba(201, 162, 74, 0.35);
+  --gold-clear: rgba(201, 162, 74, 0);
   --header-bg: rgba(6, 15, 28, 0.82);
 
   --whatsapp: #25d366;

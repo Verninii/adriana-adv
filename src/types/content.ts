@@ -1,3 +1,5 @@
+export type IconName = 'shield' | 'trending-down' | 'handshake' | 'lock';
+
 export interface NavLink {
   label: string;
   href: string;
@@ -13,10 +15,10 @@ export interface SiteInfo {
 }
 
 export interface PracticeArea {
+  icon: IconName;
   mark: string;
   title: string;
   description: string;
-  featured?: boolean;
 }
 
 export interface Credential {
