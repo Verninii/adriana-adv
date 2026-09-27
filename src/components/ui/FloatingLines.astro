@@ -1,0 +1,641 @@
+---
+type WaveName = 'top' | 'middle' | 'bottom';
+
+interface WavePosition {
+  x: number;
+  y: number;
+  rotate: number;
+}
+
+interface Props {
+  class?: string;
+  linesGradient?: readonly string[];
+  enabledWaves?: readonly WaveName[];
+  lineCount?: number | readonly number[];
+  lineDistance?: number | readonly number[];
+  topWavePosition?: WavePosition;
+  middleWavePosition?: WavePosition;
+  bottomWavePosition?: WavePosition;
+  animationSpeed?: number;
+  interactive?: boolean;
+  bendRadius?: number;
+  bendStrength?: number;
+  mouseDamping?: number;
+  parallax?: boolean;
+  parallaxStrength?: number;
+  mixBlendMode?: string;
+  backgroundColor?: string;
+  lightMode?: boolean;
+}
+
+const {
+  class: className,
+  linesGradient,
+  enabledWaves = ['top', 'middle', 'bottom'],
+  lineCount = [6],
+  lineDistance = [5],
+  topWavePosition = { x: 10, y: 0.5, rotate: -0.4 },
+  middleWavePosition = { x: 5, y: 0, rotate: 0.2 },
+  bottomWavePosition = { x: 2, y: -0.7, rotate: -1 },
+  animationSpeed = 1,
+  interactive = true,
+  bendRadius = 5,
+  bendStrength = -0.5,
+  mouseDamping = 0.05,
+  parallax = true,
+  parallaxStrength = 0.2,
+  mixBlendMode = 'screen',
+  backgroundColor = '#000000',
+  lightMode = false,
+} = Astro.props;
+
+const resolveLineCount = (wave: WaveName): number => {
+  if (!enabledWaves.includes(wave)) {
+    return 0;
+  }
+  if (typeof lineCount === 'number') {
+    return lineCount;
+  }
+  return lineCount[enabledWaves.indexOf(wave)] ?? 6;
+};
+
+const resolveLineDistance = (wave: WaveName): number => {
+  if (!enabledWaves.includes(wave)) {
+    return 0.01;
+  }
+  if (typeof lineDistance === 'number') {
+    return lineDistance * 0.01;
+  }
+  return (lineDistance[enabledWaves.indexOf(wave)] ?? 0.1) * 0.01;
+};
+
+const config = {
+  linesGradient: linesGradient ?? [],
+  enabledWaves,
+  lineCounts: {
+    top: resolveLineCount('top'),
+    middle: resolveLineCount('middle'),
+    bottom: resolveLineCount('bottom'),
+  },
+  lineDistances: {
+    top: resolveLineDistance('top'),
+    middle: resolveLineDistance('middle'),
+    bottom: resolveLineDistance('bottom'),
+  },
+  wavePositions: {
+    top: topWavePosition,
+    middle: middleWavePosition,
+    bottom: bottomWavePosition,
+  },
+  animationSpeed,
+  interactive,
+  bendRadius,
+  bendStrength,
+  mouseDamping,
+  parallax,
+  parallaxStrength,
+  backgroundColor,
+  lightMode,
+};
+
+const blendMode = lightMode ? 'normal' : mixBlendMode;
+---
+
+<div
+  class:list={['floating-lines', className]}
+  style={`mix-blend-mode:${blendMode}`}
+  data-floating-lines={JSON.stringify(config)}
+>
+</div>
+
+<style>
+  .floating-lines {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .floating-lines :global(canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  type WaveName = 'top' | 'middle' | 'bottom';
+
+  interface WavePosition {
+    x: number;
+    y: number;
+    rotate: number;
+  }
+
+  interface FloatingLinesConfig {
+    linesGradient: string[];
+    enabledWaves: WaveName[];
+    lineCounts: Record<WaveName, number>;
+    lineDistances: Record<WaveName, number>;
+    wavePositions: Record<WaveName, WavePosition>;
+    animationSpeed: number;
+    interactive: boolean;
+    bendRadius: number;
+    bendStrength: number;
+    mouseDamping: number;
+    parallax: boolean;
+    parallaxStrength: number;
+    backgroundColor: string;
+    lightMode: boolean;
+  }
+
+  const maxGradientStops = 8;
+  const maxLinesPerWave = 16;
+
+  const vertexShaderSource = `
+    attribute vec2 position;
+    void main() {
+      gl_Position = vec4(position, 0.0, 1.0);
+    }
+  `;
+
+  const fragmentShaderSource = `
+    precision highp float;
+
+    uniform float iTime;
+    uniform vec3  iResolution;
+    uniform float animationSpeed;
+
+    uniform bool enableTop;
+    uniform bool enableMiddle;
+    uniform bool enableBottom;
+
+    uniform int topLineCount;
+    uniform int middleLineCount;
+    uniform int bottomLineCount;
+
+    uniform float topLineDistance;
+    uniform float middleLineDistance;
+    uniform float bottomLineDistance;
+
+    uniform vec3 topWavePosition;
+    uniform vec3 middleWavePosition;
+    uniform vec3 bottomWavePosition;
+
+    uniform vec2 iMouse;
+    uniform bool interactive;
+    uniform float bendRadius;
+    uniform float bendStrength;
+    uniform float bendInfluence;
+
+    uniform bool parallax;
+    uniform float parallaxStrength;
+    uniform vec2 parallaxOffset;
+
+    uniform vec3 lineGradient[8];
+    uniform int lineGradientCount;
+    uniform vec3 backgroundColor;
+    uniform bool lightMode;
+
+    const int MAX_LINES = 16;
+
+    const vec3 BLACK = vec3(0.0);
+    const vec3 PINK  = vec3(233.0, 71.0, 245.0) / 255.0;
+    const vec3 BLUE  = vec3(47.0,  75.0, 162.0) / 255.0;
+
+    mat2 rotate(float r) {
+      return mat2(cos(r), sin(r), -sin(r), cos(r));
+    }
+
+    vec3 background_color(vec2 uv) {
+      vec3 col = vec3(0.0);
+
+      float y = sin(uv.x - 0.2) * 0.3 - 0.1;
+      float m = uv.y - y;
+
+      col += mix(BLUE, BLACK, smoothstep(0.0, 1.0, abs(m)));
+      col += mix(PINK, BLACK, smoothstep(0.0, 1.0, abs(m - 0.8)));
+      return col * 0.5;
+    }
+
+    vec3 getLineColor(float t, vec3 baseColor) {
+      if (lineGradientCount <= 0) {
+        return baseColor;
+      }
+
+      vec3 gradientColor;
+
+      if (lineGradientCount == 1) {
+        gradientColor = lineGradient[0];
+      } else {
+        float clampedT = clamp(t, 0.0, 0.9999);
+        float scaled = clampedT * float(lineGradientCount - 1);
+        int idx = int(floor(scaled));
+        float f = fract(scaled);
+        int lastIndex = lineGradientCount - 1;
+        int idx2 = idx + 1;
+        if (idx2 > lastIndex) {
+          idx2 = lastIndex;
+        }
+
+        vec3 c1 = vec3(0.0);
+        vec3 c2 = vec3(0.0);
+        for (int i = 0; i < 8; ++i) {
+          if (i == idx) c1 = lineGradient[i];
+          if (i == idx2) c2 = lineGradient[i];
+        }
+
+        gradientColor = mix(c1, c2, f);
+      }
+
+      return gradientColor * 0.5;
+    }
+
+    float wave(vec2 uv, float offset, vec2 screenUv, vec2 mouseUv, bool shouldBend) {
+      float time = iTime * animationSpeed;
+
+      float x_offset   = offset;
+      float x_movement = time * 0.1;
+      float amp        = sin(offset + time * 0.2) * 0.3;
+      float y          = sin(uv.x + x_offset + x_movement) * amp;
+
+      if (shouldBend) {
+        vec2 d = screenUv - mouseUv;
+        float influence = exp(-dot(d, d) * bendRadius);
+        float bendOffset = (mouseUv.y - screenUv.y) * influence * bendStrength * bendInfluence;
+        y += bendOffset;
+      }
+
+      float m = uv.y - y;
+      return 0.0175 / max(abs(m) + 0.01, 1e-3) + 0.01;
+    }
+
+    void main() {
+      vec2 fragCoord = gl_FragCoord.xy;
+      vec2 baseUv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+      baseUv.y *= -1.0;
+
+      if (parallax) {
+        baseUv += parallaxOffset;
+      }
+
+      vec3 col = vec3(0.0);
+
+      vec3 b = lineGradientCount > 0 ? vec3(0.0) : background_color(baseUv);
+
+      vec2 mouseUv = vec2(0.0);
+      if (interactive) {
+        mouseUv = (2.0 * iMouse - iResolution.xy) / iResolution.y;
+        mouseUv.y *= -1.0;
+      }
+
+      if (enableBottom) {
+        for (int i = 0; i < MAX_LINES; ++i) {
+          if (i >= bottomLineCount) break;
+          float fi = float(i);
+          float t = fi / max(float(bottomLineCount - 1), 1.0);
+          vec3 lineCol = getLineColor(t, b);
+
+          float angle = bottomWavePosition.z * log(length(baseUv) + 1.0);
+          vec2 ruv = baseUv * rotate(angle);
+          col += lineCol * wave(
+            ruv + vec2(bottomLineDistance * fi + bottomWavePosition.x, bottomWavePosition.y),
+            1.5 + 0.2 * fi,
+            baseUv,
+            mouseUv,
+            interactive
+          ) * 0.2;
+        }
+      }
+
+      if (enableMiddle) {
+        for (int i = 0; i < MAX_LINES; ++i) {
+          if (i >= middleLineCount) break;
+          float fi = float(i);
+          float t = fi / max(float(middleLineCount - 1), 1.0);
+          vec3 lineCol = getLineColor(t, b);
+
+          float angle = middleWavePosition.z * log(length(baseUv) + 1.0);
+          vec2 ruv = baseUv * rotate(angle);
+          col += lineCol * wave(
+            ruv + vec2(middleLineDistance * fi + middleWavePosition.x, middleWavePosition.y),
+            2.0 + 0.15 * fi,
+            baseUv,
+            mouseUv,
+            interactive
+          );
+        }
+      }
+
+      if (enableTop) {
+        for (int i = 0; i < MAX_LINES; ++i) {
+          if (i >= topLineCount) break;
+          float fi = float(i);
+          float t = fi / max(float(topLineCount - 1), 1.0);
+          vec3 lineCol = getLineColor(t, b);
+
+          float angle = topWavePosition.z * log(length(baseUv) + 1.0);
+          vec2 ruv = baseUv * rotate(angle);
+          ruv.x *= -1.0;
+          col += lineCol * wave(
+            ruv + vec2(topLineDistance * fi + topWavePosition.x, topWavePosition.y),
+            1.0 + 0.2 * fi,
+            baseUv,
+            mouseUv,
+            interactive
+          ) * 0.1;
+        }
+      }
+
+      if (lightMode) {
+        vec3 energy = max(col, vec3(0.0));
+        float peak = max(energy.r, max(energy.g, energy.b));
+        float coverage = smoothstep(0.018, 0.5, peak);
+        vec3 chroma = clamp(energy / max(peak, 0.0001), 0.0, 1.0);
+        chroma = pow(chroma, vec3(1.35));
+        float chromaPeak = max(chroma.r, max(chroma.g, chroma.b));
+        chroma /= max(chromaPeak, 0.0001);
+        vec3 ink = mix(chroma, clamp(chroma * 0.82, 0.0, 1.0), smoothstep(0.5, 1.0, coverage));
+        gl_FragColor = vec4(mix(vec3(1.0), ink, coverage * 0.94), 1.0);
+      } else {
+        float alpha = clamp(max(col.r, max(col.g, col.b)) * 2.0, 0.0, 1.0);
+        gl_FragColor = vec4(col, alpha);
+      }
+    }
+  `;
+
+  const hexToRgb = (hex: string): [number, number, number] => {
+    const value = hex.trim().replace('#', '');
+    const expanded =
+      value.length === 3
+        ? value
+            .split('')
+            .map((char) => char + char)
+            .join('')
+        : value;
+    if (expanded.length !== 6) {
+      return [1, 1, 1];
+    }
+    return [
+      Number.parseInt(expanded.slice(0, 2), 16) / 255,
+      Number.parseInt(expanded.slice(2, 4), 16) / 255,
+      Number.parseInt(expanded.slice(4, 6), 16) / 255,
+    ];
+  };
+
+  const compileShader = (gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null => {
+    const shader = gl.createShader(type);
+    if (!shader) {
+      return null;
+    }
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  };
+
+  const createProgram = (gl: WebGLRenderingContext): WebGLProgram | null => {
+    const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    if (!vertexShader || !fragmentShader) {
+      return null;
+    }
+    const program = gl.createProgram();
+    if (!program) {
+      return null;
+    }
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      gl.deleteProgram(program);
+      return null;
+    }
+    return program;
+  };
+
+  const lerp = (from: number, to: number, amount: number): number => from + (to - from) * amount;
+
+  const initFloatingLines = (container: HTMLElement, config: FloatingLinesConfig): void => {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl', { antialias: true, alpha: true, premultipliedAlpha: false });
+    if (!gl) {
+      return;
+    }
+
+    container.appendChild(canvas);
+
+    const program = createProgram(gl);
+    if (!program) {
+      container.removeChild(canvas);
+      return;
+    }
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+    gl.useProgram(program);
+    const positionLocation = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    const uniform = (name: string): WebGLUniformLocation | null => gl.getUniformLocation(program, name);
+
+    const uniforms = {
+      iTime: uniform('iTime'),
+      iResolution: uniform('iResolution'),
+      animationSpeed: uniform('animationSpeed'),
+      enableTop: uniform('enableTop'),
+      enableMiddle: uniform('enableMiddle'),
+      enableBottom: uniform('enableBottom'),
+      topLineCount: uniform('topLineCount'),
+      middleLineCount: uniform('middleLineCount'),
+      bottomLineCount: uniform('bottomLineCount'),
+      topLineDistance: uniform('topLineDistance'),
+      middleLineDistance: uniform('middleLineDistance'),
+      bottomLineDistance: uniform('bottomLineDistance'),
+      topWavePosition: uniform('topWavePosition'),
+      middleWavePosition: uniform('middleWavePosition'),
+      bottomWavePosition: uniform('bottomWavePosition'),
+      iMouse: uniform('iMouse'),
+      interactive: uniform('interactive'),
+      bendRadius: uniform('bendRadius'),
+      bendStrength: uniform('bendStrength'),
+      bendInfluence: uniform('bendInfluence'),
+      parallax: uniform('parallax'),
+      parallaxStrength: uniform('parallaxStrength'),
+      parallaxOffset: uniform('parallaxOffset'),
+      lineGradient: uniform('lineGradient[0]'),
+      lineGradientCount: uniform('lineGradientCount'),
+      backgroundColor: uniform('backgroundColor'),
+      lightMode: uniform('lightMode'),
+    };
+
+    const stops = config.linesGradient.slice(0, maxGradientStops);
+    const gradientData = new Float32Array(maxGradientStops * 3).fill(1);
+    stops.forEach((hex, index) => {
+      const [r, g, b] = hexToRgb(hex);
+      gradientData[index * 3] = r;
+      gradientData[index * 3 + 1] = g;
+      gradientData[index * 3 + 2] = b;
+    });
+
+    const [backgroundR, backgroundG, backgroundB] = hexToRgb(config.backgroundColor);
+
+    gl.uniform1f(uniforms.animationSpeed, config.animationSpeed);
+    gl.uniform1i(uniforms.enableTop, config.enabledWaves.includes('top') ? 1 : 0);
+    gl.uniform1i(uniforms.enableMiddle, config.enabledWaves.includes('middle') ? 1 : 0);
+    gl.uniform1i(uniforms.enableBottom, config.enabledWaves.includes('bottom') ? 1 : 0);
+    gl.uniform1i(uniforms.topLineCount, Math.min(config.lineCounts.top, maxLinesPerWave));
+    gl.uniform1i(uniforms.middleLineCount, Math.min(config.lineCounts.middle, maxLinesPerWave));
+    gl.uniform1i(uniforms.bottomLineCount, Math.min(config.lineCounts.bottom, maxLinesPerWave));
+    gl.uniform1f(uniforms.topLineDistance, config.lineDistances.top);
+    gl.uniform1f(uniforms.middleLineDistance, config.lineDistances.middle);
+    gl.uniform1f(uniforms.bottomLineDistance, config.lineDistances.bottom);
+    gl.uniform3f(
+      uniforms.topWavePosition,
+      config.wavePositions.top.x,
+      config.wavePositions.top.y,
+      config.wavePositions.top.rotate
+    );
+    gl.uniform3f(
+      uniforms.middleWavePosition,
+      config.wavePositions.middle.x,
+      config.wavePositions.middle.y,
+      config.wavePositions.middle.rotate
+    );
+    gl.uniform3f(
+      uniforms.bottomWavePosition,
+      config.wavePositions.bottom.x,
+      config.wavePositions.bottom.y,
+      config.wavePositions.bottom.rotate
+    );
+    gl.uniform1i(uniforms.interactive, config.interactive ? 1 : 0);
+    gl.uniform1f(uniforms.bendRadius, config.bendRadius);
+    gl.uniform1f(uniforms.bendStrength, config.bendStrength);
+    gl.uniform1i(uniforms.parallax, config.parallax ? 1 : 0);
+    gl.uniform1f(uniforms.parallaxStrength, config.parallaxStrength);
+    gl.uniform3fv(uniforms.lineGradient, gradientData);
+    gl.uniform1i(uniforms.lineGradientCount, stops.length);
+    gl.uniform3f(uniforms.backgroundColor, backgroundR, backgroundG, backgroundB);
+    gl.uniform1i(uniforms.lightMode, config.lightMode ? 1 : 0);
+
+    gl.clearColor(0, 0, 0, 0);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+    const resize = (): void => {
+      const width = container.clientWidth || 1;
+      const height = container.clientHeight || 1;
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform3f(uniforms.iResolution, canvas.width, canvas.height, 1);
+    };
+
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(container);
+    resize();
+
+    const targetMouse = { x: -1000, y: -1000 };
+    const currentMouse = { x: -1000, y: -1000 };
+    const targetParallax = { x: 0, y: 0 };
+    const currentParallax = { x: 0, y: 0 };
+    let targetInfluence = 0;
+    let currentInfluence = 0;
+
+    const handlePointerMove = (event: PointerEvent): void => {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      targetMouse.x = x * pixelRatio;
+      targetMouse.y = (rect.height - y) * pixelRatio;
+      targetInfluence = 1;
+
+      if (config.parallax) {
+        targetParallax.x = ((x - rect.width / 2) / rect.width) * config.parallaxStrength;
+        targetParallax.y = (-(y - rect.height / 2) / rect.height) * config.parallaxStrength;
+      }
+    };
+
+    const handlePointerLeave = (): void => {
+      targetInfluence = 0;
+    };
+
+    if (config.interactive) {
+      canvas.addEventListener('pointermove', handlePointerMove);
+      canvas.addEventListener('pointerleave', handlePointerLeave);
+    }
+
+    const startedAt = performance.now();
+    let frame = 0;
+    let visible = true;
+
+    const render = (): void => {
+      gl.uniform1f(uniforms.iTime, (performance.now() - startedAt) * 0.001);
+
+      if (config.interactive) {
+        currentMouse.x = lerp(currentMouse.x, targetMouse.x, config.mouseDamping);
+        currentMouse.y = lerp(currentMouse.y, targetMouse.y, config.mouseDamping);
+        currentInfluence = lerp(currentInfluence, targetInfluence, config.mouseDamping);
+        gl.uniform2f(uniforms.iMouse, currentMouse.x, currentMouse.y);
+        gl.uniform1f(uniforms.bendInfluence, currentInfluence);
+      }
+
+      if (config.parallax) {
+        currentParallax.x = lerp(currentParallax.x, targetParallax.x, config.mouseDamping);
+        currentParallax.y = lerp(currentParallax.y, targetParallax.y, config.mouseDamping);
+        gl.uniform2f(uniforms.parallaxOffset, currentParallax.x, currentParallax.y);
+      }
+
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      frame = visible ? requestAnimationFrame(render) : 0;
+    };
+
+    const start = (): void => {
+      if (!frame) {
+        frame = requestAnimationFrame(render);
+      }
+    };
+
+    const stop = (): void => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      visible = entries.some((entry) => entry.isIntersecting);
+      if (visible) {
+        start();
+      } else {
+        stop();
+      }
+    });
+    intersectionObserver.observe(container);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      return;
+    }
+
+    start();
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-floating-lines]').forEach((container) => {
+    const raw = container.dataset.floatingLines;
+    if (!raw) {
+      return;
+    }
+    initFloatingLines(container, JSON.parse(raw) as FloatingLinesConfig);
+  });
+</script>

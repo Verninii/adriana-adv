@@ -1,0 +1,375 @@
+---
+interface Props {
+  class?: string;
+  edgeSensitivity?: number;
+  glowColor?: string;
+  backgroundColor?: string;
+  borderRadius?: number;
+  glowRadius?: number;
+  glowIntensity?: number;
+  coneSpread?: number;
+  animated?: boolean;
+  colors?: readonly [string, string, string];
+  fillOpacity?: number;
+}
+
+const {
+  class: className,
+  edgeSensitivity = 50,
+  glowColor = '43 60 62',
+  backgroundColor = 'var(--surface-card)',
+  borderRadius = 16,
+  glowRadius = 40,
+  glowIntensity = 1,
+  coneSpread = 25,
+  animated = false,
+  colors = ['#e3cf94', '#c9a24a', '#a9803a'],
+  fillOpacity = 0.5,
+} = Astro.props;
+
+const parseHsl = (value: string): { hue: number; saturation: number; lightness: number } => {
+  const match = value.match(/([\d.]+)\s*([\d.]+)%?\s*([\d.]+)%?/);
+  if (!match) {
+    return { hue: 40, saturation: 80, lightness: 80 };
+  }
+  return {
+    hue: Number.parseFloat(match[1]),
+    saturation: Number.parseFloat(match[2]),
+    lightness: Number.parseFloat(match[3]),
+  };
+};
+
+const buildGlowVars = (value: string, intensity: number): Record<string, string> => {
+  const { hue, saturation, lightness } = parseHsl(value);
+  const base = `${hue}deg ${saturation}% ${lightness}%`;
+  const steps: readonly (readonly [string, number])[] = [
+    ['', 100],
+    ['-60', 60],
+    ['-50', 50],
+    ['-40', 40],
+    ['-30', 30],
+    ['-20', 20],
+    ['-10', 10],
+  ];
+  return Object.fromEntries(
+    steps.map(([suffix, opacity]) => [
+      `--glow-color${suffix}`,
+      `hsl(${base} / ${Math.min(opacity * intensity, 100)}%)`,
+    ])
+  );
+};
+
+const gradientPositions = [
+  '80% 55%',
+  '69% 34%',
+  '8% 6%',
+  '41% 38%',
+  '86% 85%',
+  '82% 18%',
+  '51% 4%',
+] as const;
+
+const gradientKeys = [
+  '--gradient-one',
+  '--gradient-two',
+  '--gradient-three',
+  '--gradient-four',
+  '--gradient-five',
+  '--gradient-six',
+  '--gradient-seven',
+] as const;
+
+const gradientColorIndexes = [0, 1, 2, 0, 1, 2, 1] as const;
+
+const buildGradientVars = (palette: readonly string[]): Record<string, string> => {
+  const vars = Object.fromEntries(
+    gradientKeys.map((key, index) => [
+      key,
+      `radial-gradient(at ${gradientPositions[index]}, ${palette[Math.min(gradientColorIndexes[index], palette.length - 1)]} 0px, transparent 50%)`,
+    ])
+  );
+  return { ...vars, '--gradient-base': `linear-gradient(${palette[0]} 0 100%)` };
+};
+
+const styleVars: Record<string, string> = {
+  '--card-bg': backgroundColor,
+  '--edge-sensitivity': String(edgeSensitivity),
+  '--border-radius': `${borderRadius}px`,
+  '--glow-padding': `${glowRadius}px`,
+  '--cone-spread': String(coneSpread),
+  '--fill-opacity': String(fillOpacity),
+  ...buildGlowVars(glowColor, glowIntensity),
+  ...buildGradientVars(colors),
+};
+
+const style = Object.entries(styleVars)
+  .map(([key, value]) => `${key}:${value}`)
+  .join(';');
+---
+
+<div
+  class:list={['border-glow-card', className]}
+  style={style}
+  data-border-glow
+  data-border-glow-animated={animated ? 'true' : undefined}
+>
+  <span class="edge-light"></span>
+  <div class="border-glow-inner">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .border-glow-card {
+    --edge-proximity: 0;
+    --cursor-angle: 45deg;
+    --edge-sensitivity: 30;
+    --color-sensitivity: calc(var(--edge-sensitivity) + 20);
+    --border-radius: 28px;
+    --glow-padding: 40px;
+    --cone-spread: 25;
+
+    position: relative;
+    border-radius: var(--border-radius);
+    isolation: isolate;
+    transform: translate3d(0, 0, 0.01px);
+    display: grid;
+    border: 1px solid rgb(255 255 255 / 15%);
+    background: var(--card-bg);
+    overflow: visible;
+    box-shadow:
+      rgba(0, 0, 0, 0.1) 0px 1px 2px,
+      rgba(0, 0, 0, 0.1) 0px 2px 4px,
+      rgba(0, 0, 0, 0.1) 0px 4px 8px,
+      rgba(0, 0, 0, 0.1) 0px 8px 16px,
+      rgba(0, 0, 0, 0.1) 0px 16px 32px,
+      rgba(0, 0, 0, 0.1) 0px 32px 64px;
+  }
+
+  .border-glow-card::before,
+  .border-glow-card::after,
+  .border-glow-card > .edge-light {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    transition: opacity 0.25s ease-out;
+    z-index: -1;
+  }
+
+  .border-glow-card:not(:hover):not(.sweep-active)::before,
+  .border-glow-card:not(:hover):not(.sweep-active)::after,
+  .border-glow-card:not(:hover):not(.sweep-active) > .edge-light {
+    opacity: 0;
+    transition: opacity 0.75s ease-in-out;
+  }
+
+  .border-glow-card::before {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--card-bg) 0 100%) padding-box,
+      linear-gradient(rgb(255 255 255 / 0%) 0% 100%) border-box,
+      var(--gradient-one) border-box,
+      var(--gradient-two) border-box,
+      var(--gradient-three) border-box,
+      var(--gradient-four) border-box,
+      var(--gradient-five) border-box,
+      var(--gradient-six) border-box,
+      var(--gradient-seven) border-box,
+      var(--gradient-base) border-box;
+
+    opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
+
+    mask-image: conic-gradient(
+      from var(--cursor-angle) at center,
+      black calc(var(--cone-spread) * 1%),
+      transparent calc((var(--cone-spread) + 15) * 1%),
+      transparent calc((100 - var(--cone-spread) - 15) * 1%),
+      black calc((100 - var(--cone-spread)) * 1%)
+    );
+  }
+
+  .border-glow-card::after {
+    border: 1px solid transparent;
+    background:
+      var(--gradient-one) padding-box,
+      var(--gradient-two) padding-box,
+      var(--gradient-three) padding-box,
+      var(--gradient-four) padding-box,
+      var(--gradient-five) padding-box,
+      var(--gradient-six) padding-box,
+      var(--gradient-seven) padding-box,
+      var(--gradient-base) padding-box;
+
+    mask-image:
+      linear-gradient(to bottom, black, black),
+      radial-gradient(ellipse at 50% 50%, black 40%, transparent 65%),
+      radial-gradient(ellipse at 66% 66%, black 5%, transparent 40%),
+      radial-gradient(ellipse at 33% 33%, black 5%, transparent 40%),
+      radial-gradient(ellipse at 66% 33%, black 5%, transparent 40%),
+      radial-gradient(ellipse at 33% 66%, black 5%, transparent 40%),
+      conic-gradient(from var(--cursor-angle) at center, transparent 5%, black 15%, black 85%, transparent 95%);
+
+    mask-composite: subtract, add, add, add, add, add;
+    opacity: calc(
+      var(--fill-opacity) * (var(--edge-proximity) - var(--color-sensitivity)) /
+        (100 - var(--color-sensitivity))
+    );
+    mix-blend-mode: soft-light;
+  }
+
+  .border-glow-card > .edge-light {
+    inset: calc(var(--glow-padding) * -1);
+    pointer-events: none;
+    z-index: 1;
+
+    mask-image: conic-gradient(
+      from var(--cursor-angle) at center,
+      black 2.5%,
+      transparent 10%,
+      transparent 90%,
+      black 97.5%
+    );
+
+    opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
+    mix-blend-mode: plus-lighter;
+  }
+
+  .border-glow-card > .edge-light::before {
+    content: '';
+    position: absolute;
+    inset: var(--glow-padding);
+    border-radius: inherit;
+    box-shadow:
+      inset 0 0 0 1px var(--glow-color),
+      inset 0 0 1px 0 var(--glow-color-60),
+      inset 0 0 3px 0 var(--glow-color-50),
+      inset 0 0 6px 0 var(--glow-color-40),
+      inset 0 0 15px 0 var(--glow-color-30),
+      inset 0 0 25px 2px var(--glow-color-20),
+      inset 0 0 50px 2px var(--glow-color-10),
+      0 0 1px 0 var(--glow-color-60),
+      0 0 3px 0 var(--glow-color-50),
+      0 0 6px 0 var(--glow-color-40),
+      0 0 15px 0 var(--glow-color-30),
+      0 0 25px 2px var(--glow-color-20),
+      0 0 50px 2px var(--glow-color-10);
+  }
+
+  .border-glow-inner {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<script>
+  const easeOutCubic = (progress: number): number => 1 - Math.pow(1 - progress, 3);
+  const easeInCubic = (progress: number): number => progress * progress * progress;
+
+  interface AnimateOptions {
+    start?: number;
+    end?: number;
+    duration?: number;
+    delay?: number;
+    ease?: (progress: number) => number;
+    onUpdate: (value: number) => void;
+    onEnd?: () => void;
+  }
+
+  const animateValue = ({
+    start = 0,
+    end = 100,
+    duration = 1000,
+    delay = 0,
+    ease = easeOutCubic,
+    onUpdate,
+    onEnd,
+  }: AnimateOptions): void => {
+    const startedAt = performance.now() + delay;
+    const tick = (): void => {
+      const elapsed = performance.now() - startedAt;
+      const progress = Math.min(elapsed / duration, 1);
+      onUpdate(start + (end - start) * ease(progress));
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        onEnd?.();
+      }
+    };
+    window.setTimeout(() => requestAnimationFrame(tick), delay);
+  };
+
+  const getEdgeProximity = (centerX: number, centerY: number, x: number, y: number): number => {
+    const deltaX = x - centerX;
+    const deltaY = y - centerY;
+    const ratioX = deltaX === 0 ? Infinity : centerX / Math.abs(deltaX);
+    const ratioY = deltaY === 0 ? Infinity : centerY / Math.abs(deltaY);
+    return Math.min(Math.max(1 / Math.min(ratioX, ratioY), 0), 1);
+  };
+
+  const getCursorAngle = (centerX: number, centerY: number, x: number, y: number): number => {
+    const deltaX = x - centerX;
+    const deltaY = y - centerY;
+    if (deltaX === 0 && deltaY === 0) {
+      return 0;
+    }
+    const degrees = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+    return degrees < 0 ? degrees + 360 : degrees;
+  };
+
+  const playIntroSweep = (card: HTMLElement): void => {
+    const angleStart = 110;
+    const angleEnd = 465;
+    const setAngle = (value: number): void => {
+      card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (value / 100) + angleStart}deg`);
+    };
+
+    card.classList.add('sweep-active');
+    card.style.setProperty('--cursor-angle', `${angleStart}deg`);
+
+    animateValue({
+      duration: 500,
+      onUpdate: (value) => card.style.setProperty('--edge-proximity', String(value)),
+    });
+    animateValue({ ease: easeInCubic, duration: 1500, end: 50, onUpdate: setAngle });
+    animateValue({
+      ease: easeOutCubic,
+      delay: 1500,
+      duration: 2250,
+      start: 50,
+      end: 100,
+      onUpdate: setAngle,
+    });
+    animateValue({
+      ease: easeInCubic,
+      delay: 2500,
+      duration: 1500,
+      start: 100,
+      end: 0,
+      onUpdate: (value) => card.style.setProperty('--edge-proximity', String(value)),
+      onEnd: () => card.classList.remove('sweep-active'),
+    });
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-border-glow]').forEach((card) => {
+    card.addEventListener('pointermove', (event) => {
+      const rect = card.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      card.style.setProperty(
+        '--edge-proximity',
+        (getEdgeProximity(centerX, centerY, x, y) * 100).toFixed(3)
+      );
+      card.style.setProperty('--cursor-angle', `${getCursorAngle(centerX, centerY, x, y).toFixed(3)}deg`);
+    });
+
+    if (card.dataset.borderGlowAnimated === 'true') {
+      playIntroSweep(card);
+    }
+  });
+</script>

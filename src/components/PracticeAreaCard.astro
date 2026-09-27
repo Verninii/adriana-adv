@@ -1,4 +1,5 @@
 ---
+import BorderGlow from './ui/BorderGlow.astro';
 import Icon from './ui/Icon.astro';
 import type { PracticeArea } from '../types/content';
 
@@ -7,14 +8,16 @@ type Props = PracticeArea;
 const { icon, mark, title, description } = Astro.props;
 ---
 
-<article class="area-card">
-  <span class="area-card__badge">
-    <Icon name={icon} size={26} />
-  </span>
-  <span class="area-card__mark">{mark}</span>
-  <h3 class="area-card__title">{title}</h3>
-  <p class="area-card__description">{description}</p>
-</article>
+<BorderGlow edgeSensitivity={6}>
+  <article class="area-card">
+    <span class="area-card__badge">
+      <Icon name={icon} size={26} />
+    </span>
+    <span class="area-card__mark">{mark}</span>
+    <h3 class="area-card__title">{title}</h3>
+    <p class="area-card__description">{description}</p>
+  </article>
+</BorderGlow>
 
 <style>
   .area-card {
@@ -22,25 +25,14 @@ const { icon, mark, title, description } = Astro.props;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-top: 26px;
+    height: 100%;
     padding: 42px 28px 26px;
-    background: var(--surface-card);
-    border: 1px solid var(--gold-clear);
-    border-top-color: var(--gold-500);
-    border-left-color: var(--gold-500);
-    border-radius: var(--radius-lg);
-    transition: border-color 260ms ease;
-  }
-
-  .area-card:hover {
-    border-color: var(--gold-500);
   }
 
   .area-card__badge {
     position: absolute;
-    top: 0;
-    left: 28px;
-    transform: translateY(-50%);
+    top: -26px;
+    left: 0;
     display: grid;
     place-items: center;
     width: 52px;
@@ -70,11 +62,5 @@ const { icon, mark, title, description } = Astro.props;
     line-height: 1.55;
     color: var(--text-soft);
     margin: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .area-card {
-      transition: none;
-    }
   }
 </style>
