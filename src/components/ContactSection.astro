@@ -21,13 +21,13 @@ import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
 
   <div class="contact__inner">
     <div class="contact__copy">
-      <a class="contact__maps" href={mapsUrl} target="_blank" rel="noopener">
-        <GradientText animationSpeed={6}>ver no Google Maps</GradientText>
+      <a class="contact__maps" target="_blank" rel="noopener">
+        <GradientText animationSpeed={6}>Atendimento 100% Online</GradientText>
         <Icon name="arrow-right" size={18} />
       </a>
       <Eyebrow class="contact__eyebrow">Agende uma consulta</Eyebrow>
       <h2 class="contact__title">
-        <StrokeText text="Fale com a Adriana" height="clamp(2.6rem, 4vw + 1rem, 3.6rem)" />
+        <StrokeText text="Fale com especialista" height="clamp(2.6rem, 4vw + 1rem, 3.6rem)" />
       </h2>
       <BlurText
         class="contact__text"
@@ -37,10 +37,6 @@ import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
         class="contact__details"
         data-reveal={JSON.stringify({ direction: 'left', distance: '60px', stagger: 150, duration: 600 })}
       >
-        <address class="contact__address">
-          {siteInfo.street}<br />
-          {siteInfo.city}
-        </address>
         <address class="contact__address">
           {siteInfo.hours}
         </address>

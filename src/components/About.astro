@@ -11,7 +11,6 @@ import { aboutStats } from '../data/stats';
 const backgroundImage = await getImage({ src: background, format: 'webp', width: 2000 });
 const backgroundUrl = `url(${backgroundImage.src})`;
 const aboutIntro = `${siteInfo.name} é advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em situações de endividamento fiscal, execuções tributárias e negociações com o Fisco.`;
-const aboutApproach = `No escritório ${siteInfo.name} Advocacia, o foco está primeiro na dor do cliente — não apenas nos honorários, mas no ser humano que precisa deitar no travesseiro e ter o sono tranquilo.`;
 ---
 
 <section id="sobre" class="about">
@@ -26,8 +25,7 @@ const aboutApproach = `No escritório ${siteInfo.name} Advocacia, o foco está p
         <StrokeText accent="mudar vidas" text="" height="clamp(1.9rem, 2.4vw + 1rem, 2.7rem)" />
       </h2>
 
-      <BlurText class="about__text" text={aboutIntro} />
-      <BlurText class="about__text" text={aboutApproach} />
+      <BlurText class="about__text" maxWidth='65%' text={aboutIntro} />
       <div class="about__stats" data-reveal={JSON.stringify({ direction: 'left', distance: '60px', stagger: 150, duration: 600 })}>
         {aboutStats.map((stat) => <Indicator {...stat} />)}
       </div>

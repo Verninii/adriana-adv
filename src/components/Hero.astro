@@ -18,7 +18,6 @@ const nameParts = siteInfo.name.split(' ');
 
   <div class="hero__inner">
     <div class="hero__copy">
-      <Eyebrow class="hero__eyebrow">Bem-vinda(o)</Eyebrow>
       <h1 class="hero__title">
         {
           nameParts.map((part) => (
@@ -29,6 +28,7 @@ const nameParts = siteInfo.name.split(' ');
       <p class="hero__role">{siteInfo.role}</p>
       <BlurText
         class="hero__lede"
+        maxWidth="70%"
         text="Advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em situações de endividamento fiscal, execuções tributárias e negociações com o Fisco."
       />
       <div class="hero__actions" data-reveal={JSON.stringify({ direction: 'up', distance: '40px', stagger: 160, duration: 600 })}>

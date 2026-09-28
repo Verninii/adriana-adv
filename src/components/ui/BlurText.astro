@@ -8,6 +8,7 @@ interface Props {
   stepDuration?: number;
   threshold?: number;
   rootMargin?: string;
+  maxWidth?: string;
 }
 
 const {
@@ -19,6 +20,7 @@ const {
   stepDuration = 0.35,
   threshold = 0.1,
   rootMargin = '0px',
+  maxWidth = 'none',
 } = Astro.props;
 
 const segments = animateBy === 'words' ? text.split(' ') : Array.from(text);
@@ -36,10 +38,11 @@ const config = { animateBy, direction, delay, stepDuration, threshold, rootMargi
   }
 </p>
 
-<style>
+<style define:vars={{ blurTextMaxWidth: maxWidth }}>
   .blur-text {
     display: flex;
     flex-wrap: wrap;
+    max-width: var(--blurTextMaxWidth);
   }
 
   .blur-text__segment {

@@ -1,7 +1,7 @@
 import type { NavLink, SiteInfo, SocialLink } from '../types/content';
 
 export const siteInfo: SiteInfo = {
-  name: 'Adriana Marcondes',
+  name: 'Dra. Adriana Marcondes',
   tagline: 'Soluções Fiscais',
   logoAlt: 'Adriana Marcondes — Soluções Fiscais',
   summary:
@@ -10,10 +10,10 @@ export const siteInfo: SiteInfo = {
   whatsappNumber: '5511947544718',
   whatsappMessage: 'Olá! Gostaria de agendar uma consulta sobre minha situação fiscal.',
   phone: '(11) 94754-4718',
-  email: 'contato@adrianamarcondes.adv.br',
+  email: 'amsfiscais@gmail.com',
   street: 'Rua Ângelo Airoldi, 91',
   city: 'Jandira — SP',
-  hours: 'Seg a sex, 9h às 18h',
+  hours: 'Seg a sex, 8:30h às 17h',
 };
 
 export const whatsappUrl = `https://wa.me/${siteInfo.whatsappNumber}?text=${encodeURIComponent(siteInfo.whatsappMessage)}`;
@@ -32,6 +32,6 @@ export const navLinks: readonly NavLink[] = [
 ];
 
 export const socialLinks: readonly SocialLink[] = [
-  { label: 'Instagram', href: '#', icon: 'instagram' },
+  { label: 'Instagram', href: 'https://www.instagram.com/amsfiscais', icon: 'instagram' },
   { label: 'WhatsApp', href: whatsappUrl, icon: 'whatsapp' },
 ];
