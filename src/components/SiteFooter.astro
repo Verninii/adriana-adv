@@ -1,57 +1,177 @@
 ---
+import Icon from './ui/Icon.astro';
 import Logo from './ui/Logo.astro';
-import { footerLinks, siteInfo } from '../data/site';
+import { navLinks, siteInfo, socialLinks, whatsappUrl } from '../data/site';
 
 const currentYear = new Date().getFullYear();
 ---
 
 <footer class="footer">
   <div class="footer__inner">
-    <div class="footer__brand">
-      <Logo class="footer__logo" />
-      <span>
-        © {currentYear} {siteInfo.name} — {siteInfo.tagline}. Todos os direitos reservados.
-      </span>
+    <div class="footer__columns">
+      <div class="footer__brand">
+        <div class="footer__identity">
+          <Logo class="footer__logo" />
+        </div>
+        <p class="footer__summary">{siteInfo.summary}</p>
+        <ul class="footer__icons">
+          {
+            socialLinks.map((social) => (
+              <li>
+                <a
+                  class="footer__icon"
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={social.label}
+                >
+                  <Icon name={social.icon} size={17} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <nav class="footer__column footer__column--nav" aria-label="Navegação do rodapé">
+        <span class="footer__heading">Links</span>
+        <ul class="footer__list">
+          {
+            navLinks.map((link) => (
+              <li>
+                <a class="footer__link" href={link.href}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="footer__column">
+        <span class="footer__heading">Contato</span>
+        <ul class="footer__list">
+          <li class="footer__item">
+            {siteInfo.street}<br />
+            {siteInfo.city}
+          </li>
+          <li>
+            <a class="footer__link" href={`mailto:${siteInfo.email}`}>{siteInfo.email}</a>
+          </li>
+          <li>
+            <a class="footer__link" href={whatsappUrl} target="_blank" rel="noopener">
+              {siteInfo.phone}
+            </a>
+          </li>
+          <li class="footer__item">{siteInfo.hours}</li>
+        </ul>
+      </div>
     </div>
-    <nav class="footer__links" aria-label="Navegação do rodapé">
-      {footerLinks.map((link) => <a href={link.href} class="footer__link">{link.label}</a>)}
-    </nav>
+
+    <p class="footer__copyright">
+      © {currentYear} {siteInfo.name} — {siteInfo.tagline}. Todos os direitos reservados.
+    </p>
   </div>
 </footer>
 
 <style>
   .footer {
-    padding-block: 36px;
+    padding-block: 64px 32px;
+    background: #000;
     border-top: 1px solid var(--rule);
   }
 
   .footer__inner {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    flex-direction: column;
+    gap: 48px;
     max-width: var(--container-outer-max);
     margin: 0 auto;
     padding-inline: var(--container-padding-x);
-    font-size: 0.82rem;
+    font-size: 0.88rem;
     color: var(--cream-dim);
+  }
+
+  .footer__columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
   }
 
   .footer__brand {
     display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 42ch;
+  }
+
+  .footer__identity {
+    display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
   .footer__logo {
-    width: 26px;
-    height: 26px;
+    width: auto;
+    height: 64px;
   }
 
-  .footer__links {
+  .footer__summary {
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  .footer__icons {
+    list-style: none;
     display: flex;
-    gap: 22px;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer__icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--navy-950);
+    transition:
+      background var(--transition-base),
+      transform var(--transition-base);
+  }
+
+  .footer__icon:hover {
+    background: var(--gold-300);
+    transform: translateY(-2px);
+  }
+
+  .footer__column {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .footer__heading {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-300);
+  }
+
+  .footer__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .footer__item {
+    line-height: 1.7;
   }
 
   .footer__link {
@@ -59,7 +179,47 @@ const currentYear = new Date().getFullYear();
     transition: color var(--transition-base);
   }
 
+  .footer__column--nav .footer__link {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
   .footer__link:hover {
     color: var(--gold-300);
+  }
+
+  .footer__copyright {
+    margin: 0;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 860px) {
+    .footer__columns {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .footer__columns {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer__icon {
+      transition: none;
+    }
+
+    .footer__icon:hover {
+      transform: none;
+    }
   }
 </style>

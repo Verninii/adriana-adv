@@ -1,25 +1,26 @@
 ---
 import Button from './ui/Button.astro';
 import Logo from './ui/Logo.astro';
-import { navLinks, siteInfo, whatsappUrl } from '../data/site';
+import { navLinks, whatsappUrl } from '../data/site';
 ---
 
 <header class="header">
   <div class="header__inner">
-    <a href="/" class="header__brand">
+    <a href="#inicio" class="header__brand">
       <Logo class="header__logo" loading="eager" />
-      <span class="header__name">{siteInfo.name}</span>
     </a>
-    <nav class="header__nav" aria-label="Navegação principal">
-      {
-        navLinks.map((link) => (
-          <a href={link.href} class="header__link">
-            {link.label}
-          </a>
-        ))
-      }
-    </nav>
-    <Button href={whatsappUrl} external>Agendar consulta</Button>
+    <div class="header__actions">
+      <nav class="header__nav" aria-label="Navegação principal">
+        {
+          navLinks.map((link) => (
+            <a href={link.href} class="header__link">
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+      <Button href={whatsappUrl} external>Entre em contato</Button>
+    </div>
   </div>
 </header>
 
@@ -47,25 +48,28 @@ import { navLinks, siteInfo, whatsappUrl } from '../data/site';
   .header__brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    letter-spacing: 0.04em;
   }
 
   .header__logo {
-    width: 34px;
-    height: 34px;
+    width: auto;
+    height: 52px;
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
   }
 
   .header__nav {
     display: flex;
-    gap: 28px;
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
+    align-items: center;
   }
 
   .header__link {
+    padding: 12px 20px;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--cream-dim);
     transition: color var(--transition-base);
   }
@@ -75,7 +79,7 @@ import { navLinks, siteInfo, whatsappUrl } from '../data/site';
     color: var(--gold-300);
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 860px) {
     .header__nav {
       display: none;
     }

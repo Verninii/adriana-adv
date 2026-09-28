@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import logo from '../../assets/new-logo.jpeg';
+import logo from '../../assets/logo-trimmed.png';
 import { siteInfo } from '../../data/site';
 
 interface Props {
@@ -15,7 +15,6 @@ const { class: className, loading = 'lazy', ...rest } = Astro.props;
 
 <style>
   .logo {
-    border-radius: 50%;
-    object-fit: cover;
+    object-fit: contain;
   }
 </style>

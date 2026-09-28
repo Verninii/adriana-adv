@@ -1,98 +1,159 @@
 ---
-import Button from './ui/Button.astro';
-import Eyebrow from './ui/Eyebrow.astro';
-import { whatsappUrl } from '../data/site';
+import ContactForm from "./ContactForm.astro";
+import Eyebrow from "./ui/Eyebrow.astro";
+import Icon from "./ui/Icon.astro";
+import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
 ---
 
-<section id="contato" class="cta">
-  <div class="cta__inner">
-    <div class="cta__box">
-      <div class="cta__copy">
-        <Eyebrow class="cta__eyebrow">Agende uma consulta</Eyebrow>
-        <h2 class="cta__title">Atendimento em todo o Brasil, na consultoria online</h2>
-        <p class="cta__text">
-          Fale diretamente pelo WhatsApp e explique sua situação fiscal — o retorno é feito com sigilo
-          e atenção individual.
-        </p>
-      </div>
-      <div class="cta__side">
-        <Button href={whatsappUrl} external>Chamar no WhatsApp</Button>
-        <span class="cta__note">Resposta em horário comercial</span>
-      </div>
+<section id="contato" class="contact">
+  <div class="contact__map" aria-hidden="true">
+    <iframe
+      class="contact__frame"
+      src={mapEmbedUrl}
+      title={`Mapa de ${siteInfo.street}, ${siteInfo.city}`}
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <div class="contact__overlay" aria-hidden="true"></div>
+
+  <div class="contact__inner">
+    <div class="contact__copy">
+      <a class="contact__maps" href={mapsUrl} target="_blank" rel="noopener">
+        ver no Google Maps
+        <Icon name="arrow-right" size={18} />
+      </a>
+      <Eyebrow class="contact__eyebrow">Agende uma consulta</Eyebrow>
+      <h2 class="contact__title">Fale com a Adriana</h2>
+      <p class="contact__text">
+        Explique a sua situação fiscal e receba o retorno com sigilo e atenção
+        individual. O atendimento é on-line para todo o Brasil.
+      </p>
+      <address class="contact__address">
+        {siteInfo.street}<br />
+        {siteInfo.city}
+      </address>
+      <address class="contact__address">
+        {siteInfo.hours}
+      </address>
+      <address class="contact__address">
+        {siteInfo.phone}
+      </address>
     </div>
+
+    <ContactForm />
   </div>
 </section>
 
 <style>
-  .cta {
-    background:
-      radial-gradient(ellipse 700px 400px at 85% 0%, rgba(201, 162, 74, 0.16), transparent 60%),
-      var(--navy-950);
+  .contact {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background-color: var(--navy-950);
   }
 
-  .cta__inner {
+  .contact__map {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  .contact__frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    filter: grayscale(1) invert(0.92) contrast(0.92) brightness(0.86);
+  }
+
+  .contact__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(6, 15, 28, 0.9) 0%,
+        rgba(6, 15, 28, 0.35) 22%
+      ),
+      linear-gradient(
+        100deg,
+        rgba(6, 15, 28, 0.94) 0%,
+        rgba(6, 15, 28, 0.78) 45%,
+        rgba(6, 15, 28, 0.62) 100%
+      );
+  }
+
+  .contact__inner {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 480px);
+    align-items: center;
+    gap: 56px;
     max-width: var(--container-outer-max);
     margin: 0 auto;
     padding-inline: var(--container-padding-x);
   }
 
-  .cta__box {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 40px;
+  .contact__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .contact__maps {
+    display: inline-flex;
     align-items: center;
-    padding: 48px;
-    background: var(--navy-900);
-    border: 1px solid var(--rule);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow);
+    gap: 10px;
+    margin-bottom: 28px;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--cream-dim);
+    transition: color var(--transition-base);
   }
 
-  .cta__eyebrow {
-    margin-bottom: 12px;
+  .contact__maps:hover {
+    color: var(--gold-300);
   }
 
-  .cta__title {
-    font-size: clamp(1.8rem, 2vw + 1rem, 2.4rem);
+  .contact__eyebrow {
     margin-bottom: 14px;
   }
 
-  .cta__text {
-    max-width: 44ch;
+  .contact__title {
+    font-size: clamp(2.4rem, 4vw + 1rem, 3.8rem);
+    line-height: 1.05;
+    margin-bottom: 18px;
+  }
+
+  .contact__text {
+    max-width: 42ch;
     color: var(--cream-dim);
-    margin: 0;
+    margin: 0 0 24px;
   }
 
-  .cta__side {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding-left: 36px;
-    border-left: 1px solid var(--rule);
+  .contact__address {
+    font-style: normal;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--cream);
+    padding-left: 14px;
+    border-left: 2px solid var(--gold-500);
+    margin-top: 10px;
   }
 
-  .cta__note {
-    font-size: 0.82rem;
-    color: var(--cream-dim);
-    text-align: center;
-  }
-
-  @media (max-width: 780px) {
-    .cta__box {
+  @media (max-width: 900px) {
+    .contact__inner {
       grid-template-columns: 1fr;
-      padding: 34px 26px;
-      text-align: center;
+      gap: 40px;
     }
 
-    .cta__text {
-      margin-inline: auto;
-    }
-
-    .cta__side {
-      padding-left: 0;
-      padding-top: 26px;
-      border-left: none;
-      border-top: 1px solid var(--rule);
+    .contact__overlay {
+      background: linear-gradient(
+        to bottom,
+        rgba(6, 15, 28, 0.9) 0%,
+        rgba(6, 15, 28, 0.82) 45%,
+        rgba(6, 15, 28, 0.94) 100%
+      );
     }
   }
 </style>

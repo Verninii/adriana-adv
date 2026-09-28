@@ -1,0 +1,131 @@
+---
+import Button from './ui/Button.astro';
+import FormField from './ui/FormField.astro';
+import { siteInfo } from '../data/site';
+---
+
+<div class="panel">
+  <span class="panel__eyebrow">Formulário de contato</span>
+
+  <form class="form" data-contact-form data-whatsapp-number={siteInfo.whatsappNumber}>
+    <FormField label="Nome" name="nome" placeholder="Seu nome completo" autocomplete="name" required />
+    <FormField
+      label="E-mail"
+      name="email"
+      type="email"
+      placeholder="voce@email.com"
+      autocomplete="email"
+    />
+    <FormField
+      label="Telefone"
+      name="telefone"
+      type="tel"
+      placeholder="(11) 90000-0000"
+      autocomplete="tel"
+    />
+    <FormField
+      control="textarea"
+      label="Mensagem"
+      name="mensagem"
+      rows={3}
+      placeholder="Descreva brevemente a sua situação fiscal"
+      required
+    />
+
+    <div class="form__actions">
+      <span class="form__note">O envio abre o WhatsApp com a sua mensagem</span>
+      <Button type="submit">Enviar mensagem</Button>
+    </div>
+  </form>
+</div>
+
+<style>
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    padding: 38px 34px;
+    background: var(--surface-card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .panel__eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-300);
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  .form__note {
+    font-size: 0.78rem;
+    color: var(--cream-dim);
+    max-width: 22ch;
+  }
+
+  @media (max-width: 520px) {
+    .panel {
+      padding: 30px 24px;
+    }
+
+    .form__actions {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .form__note {
+      max-width: none;
+    }
+  }
+</style>
+
+<script>
+  const buildMessage = (form: HTMLFormElement): string => {
+    const data = new FormData(form);
+    const name = String(data.get('nome') ?? '').trim();
+    const email = String(data.get('email') ?? '').trim();
+    const phone = String(data.get('telefone') ?? '').trim();
+    const message = String(data.get('mensagem') ?? '').trim();
+
+    const lines = [`Olá! Meu nome é ${name}.`, message, ''];
+    if (email) {
+      lines.push(`E-mail: ${email}`);
+    }
+    if (phone) {
+      lines.push(`Telefone: ${phone}`);
+    }
+
+    return lines.filter((line, index) => line !== '' || index === 2).join('\n');
+  };
+
+  document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const number = form.dataset.whatsappNumber;
+      if (!number) {
+        return;
+      }
+      const url = `https://wa.me/${number}?text=${encodeURIComponent(buildMessage(form))}`;
+      window.open(url, '_blank', 'noopener');
+    });
+  });
+</script>
