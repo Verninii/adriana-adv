@@ -1,0 +1,84 @@
+---
+interface Props {
+  class?: string;
+  colors?: readonly string[];
+  animationSpeed?: number;
+  direction?: 'horizontal' | 'vertical' | 'diagonal';
+  pauseOnHover?: boolean;
+  yoyo?: boolean;
+}
+
+const {
+  class: className,
+  colors = ['#a9803a', '#e3cf94', '#f3e9cd', '#c9a24a'],
+  animationSpeed = 8,
+  direction = 'horizontal',
+  pauseOnHover = false,
+  yoyo = true,
+} = Astro.props;
+
+const gradientAngle =
+  direction === 'horizontal' ? 'to right' : direction === 'vertical' ? 'to bottom' : 'to bottom right';
+const gradientColors = [...colors, colors[0]].join(', ');
+const backgroundImage = `linear-gradient(${gradientAngle}, ${gradientColors})`;
+const backgroundSize =
+  direction === 'horizontal' ? '300% 100%' : direction === 'vertical' ? '100% 300%' : '300% 300%';
+const animationName = direction === 'vertical' ? 'gradient-text-vertical' : 'gradient-text-horizontal';
+---
+
+<span
+  class:list={['gradient-text', { 'gradient-text--pause': pauseOnHover }, className]}
+  data-gradient-text
+>
+  <slot />
+</span>
+
+<style
+  define:vars={{
+    gradientTextImage: backgroundImage,
+    gradientTextSize: backgroundSize,
+    gradientTextDuration: `${animationSpeed}s`,
+    gradientTextDirection: yoyo ? 'alternate' : 'normal',
+    gradientTextName: animationName,
+  }}
+>
+  .gradient-text {
+    display: inline-block;
+    background-image: var(--gradientTextImage);
+    background-size: var(--gradientTextSize);
+    background-repeat: repeat;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: var(--gradientTextName) var(--gradientTextDuration) linear infinite;
+    animation-direction: var(--gradientTextDirection);
+  }
+
+  .gradient-text--pause:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes gradient-text-horizontal {
+    from {
+      background-position: 0% 50%;
+    }
+    to {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes gradient-text-vertical {
+    from {
+      background-position: 50% 0%;
+    }
+    to {
+      background-position: 50% 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-text {
+      animation: none;
+    }
+  }
+</style>

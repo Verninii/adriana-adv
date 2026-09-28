@@ -1,6 +1,9 @@
 ---
 import ContactForm from "./ContactForm.astro";
+import BlurText from "./ui/BlurText.astro";
+import GradientText from "./ui/GradientText.astro";
 import Eyebrow from "./ui/Eyebrow.astro";
+import StrokeText from "./ui/StrokeText.astro";
 import Icon from "./ui/Icon.astro";
 import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
 ---
@@ -19,25 +22,32 @@ import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
   <div class="contact__inner">
     <div class="contact__copy">
       <a class="contact__maps" href={mapsUrl} target="_blank" rel="noopener">
-        ver no Google Maps
+        <GradientText animationSpeed={6}>ver no Google Maps</GradientText>
         <Icon name="arrow-right" size={18} />
       </a>
       <Eyebrow class="contact__eyebrow">Agende uma consulta</Eyebrow>
-      <h2 class="contact__title">Fale com a Adriana</h2>
-      <p class="contact__text">
-        Explique a sua situação fiscal e receba o retorno com sigilo e atenção
-        individual. O atendimento é on-line para todo o Brasil.
-      </p>
-      <address class="contact__address">
-        {siteInfo.street}<br />
-        {siteInfo.city}
-      </address>
-      <address class="contact__address">
-        {siteInfo.hours}
-      </address>
-      <address class="contact__address">
-        {siteInfo.phone}
-      </address>
+      <h2 class="contact__title">
+        <StrokeText text="Fale com a Adriana" height="clamp(2.6rem, 4vw + 1rem, 3.6rem)" />
+      </h2>
+      <BlurText
+        class="contact__text"
+        text="Explique a sua situação fiscal e receba o retorno com sigilo e atenção individual. O atendimento é on-line para todo o Brasil."
+      />
+      <div
+        class="contact__details"
+        data-reveal={JSON.stringify({ direction: 'left', distance: '60px', stagger: 150, duration: 600 })}
+      >
+        <address class="contact__address">
+          {siteInfo.street}<br />
+          {siteInfo.city}
+        </address>
+        <address class="contact__address">
+          {siteInfo.hours}
+        </address>
+        <address class="contact__address">
+          {siteInfo.phone}
+        </address>
+      </div>
     </div>
 
     <ContactForm />
@@ -129,6 +139,12 @@ import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
     max-width: 42ch;
     color: var(--cream-dim);
     margin: 0 0 24px;
+  }
+
+  .contact__details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .contact__address {

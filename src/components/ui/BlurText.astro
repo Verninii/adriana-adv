@@ -1,0 +1,122 @@
+---
+interface Props {
+  text: string;
+  class?: string;
+  animateBy?: 'words' | 'letters';
+  direction?: 'top' | 'bottom';
+  delay?: number;
+  stepDuration?: number;
+  threshold?: number;
+  rootMargin?: string;
+}
+
+const {
+  text,
+  class: className,
+  animateBy = 'words',
+  direction = 'top',
+  delay = 60,
+  stepDuration = 0.35,
+  threshold = 0.1,
+  rootMargin = '0px',
+} = Astro.props;
+
+const segments = animateBy === 'words' ? text.split(' ') : Array.from(text);
+const config = { animateBy, direction, delay, stepDuration, threshold, rootMargin };
+---
+
+<p class:list={['blur-text', className]} data-blur-text={JSON.stringify(config)}>
+  {
+    segments.map((segment, index) => (
+      <span class="blur-text__segment">
+        {segment === ' ' ? ' ' : segment}
+        {animateBy === 'words' && index < segments.length - 1 ? ' ' : ''}
+      </span>
+    ))
+  }
+</p>
+
+<style>
+  .blur-text {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .blur-text__segment {
+    display: inline-block;
+    will-change: transform, filter, opacity;
+  }
+
+  .blur-text--ready .blur-text__segment {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  interface BlurTextConfig {
+    animateBy: 'words' | 'letters';
+    direction: 'top' | 'bottom';
+    delay: number;
+    stepDuration: number;
+    threshold: number;
+    rootMargin: string;
+  }
+
+  const buildKeyframes = (direction: 'top' | 'bottom'): Keyframe[] => {
+    const offset = direction === 'top' ? -50 : 50;
+    const midOffset = direction === 'top' ? 5 : -5;
+    return [
+      { filter: 'blur(10px)', opacity: 0, transform: `translateY(${offset}px)` },
+      { filter: 'blur(5px)', opacity: 0.5, transform: `translateY(${midOffset}px)`, offset: 0.5 },
+      { filter: 'blur(0px)', opacity: 1, transform: 'translateY(0)' },
+    ];
+  };
+
+  const animateSegments = (container: HTMLElement, config: BlurTextConfig): void => {
+    const segments = container.querySelectorAll<HTMLElement>('.blur-text__segment');
+    const keyframes = buildKeyframes(config.direction);
+    const duration = config.stepDuration * 2 * 1000;
+
+    segments.forEach((segment, index) => {
+      const animation = segment.animate(keyframes, {
+        duration,
+        delay: index * config.delay,
+        easing: 'ease-out',
+        fill: 'both',
+      });
+      animation.addEventListener('finish', () => {
+        segment.style.opacity = '1';
+        animation.cancel();
+      });
+    });
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-blur-text]').forEach((container) => {
+    const raw = container.dataset.blurText;
+    if (!raw) {
+      return;
+    }
+    const config = JSON.parse(raw) as BlurTextConfig;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    container.classList.add('blur-text--ready');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+          observer.disconnect();
+          animateSegments(container, config);
+        });
+      },
+      { threshold: config.threshold, rootMargin: config.rootMargin }
+    );
+
+    observer.observe(container);
+  });
+</script>

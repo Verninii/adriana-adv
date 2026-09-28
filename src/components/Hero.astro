@@ -1,7 +1,9 @@
 ---
 import { getImage } from 'astro:assets';
 import Button from './ui/Button.astro';
+import BlurText from './ui/BlurText.astro';
 import Eyebrow from './ui/Eyebrow.astro';
+import StrokeText from './ui/StrokeText.astro';
 import background from '../assets/new-bg-hero.png';
 import { siteInfo, whatsappUrl } from '../data/site';
 
@@ -18,14 +20,18 @@ const nameParts = siteInfo.name.split(' ');
     <div class="hero__copy">
       <Eyebrow class="hero__eyebrow">Bem-vinda(o)</Eyebrow>
       <h1 class="hero__title">
-        {nameParts.map((part) => <span class="hero__title-line">{part}</span>)}
+        {
+          nameParts.map((part) => (
+            <StrokeText class="hero__title-line" text={part} height="clamp(2.8rem, 5vw + 1rem, 4.6rem)" />
+          ))
+        }
       </h1>
       <p class="hero__role">{siteInfo.role}</p>
-      <p class="hero__lede">
-        Advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em
-        situações de endividamento fiscal, execuções tributárias e negociações com o Fisco.
-      </p>
-      <div class="hero__actions">
+      <BlurText
+        class="hero__lede"
+        text="Advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em situações de endividamento fiscal, execuções tributárias e negociações com o Fisco."
+      />
+      <div class="hero__actions" data-reveal={JSON.stringify({ direction: 'up', distance: '40px', stagger: 160, duration: 600 })}>
         <Button href={whatsappUrl} external>Falar no WhatsApp</Button>
         <Button href="#atuacao" variant="secondary">Áreas de atuação</Button>
       </div>
@@ -89,8 +95,10 @@ const nameParts = siteInfo.name.split(' ');
   }
 
   .hero__title {
-    font-size: clamp(2.6rem, 5vw + 1rem, 4.3rem);
-    line-height: 1.04;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
     margin-bottom: 20px;
   }
 

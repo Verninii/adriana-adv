@@ -1,4 +1,5 @@
 ---
+import RevealMotion from '../components/ui/RevealMotion.astro';
 import '../styles/tokens.css';
 import '../styles/global.css';
 
@@ -31,6 +32,7 @@ const { title, description } = Astro.props;
     <div class="site">
       <slot />
     </div>
+    <RevealMotion />
   </body>
 </html>
 

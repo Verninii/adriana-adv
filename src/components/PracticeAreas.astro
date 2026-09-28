@@ -1,7 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
-import Accent from './ui/Accent.astro';
-import SectionHeading from './ui/SectionHeading.astro';
+import Eyebrow from './ui/Eyebrow.astro';
+import StrokeText from './ui/StrokeText.astro';
 import PracticeAreaCard from './PracticeAreaCard.astro';
 import background from '../assets/new-bg-right.png';
 import { practiceAreas } from '../data/practiceAreas';
@@ -14,11 +14,15 @@ const backgroundUrl = `url(${backgroundImage.src})`;
   <div class="areas__backdrop" aria-hidden="true"></div>
   <div class="areas__overlay" aria-hidden="true"></div>
   <div class="areas__inner">
-    <SectionHeading eyebrow="Área de atuação">
-      Especialista em soluções de <Accent>dívidas fiscais</Accent>
-    </SectionHeading>
+    <div class="areas__heading">
+      <Eyebrow class="areas__eyebrow">Área de atuação</Eyebrow>
+      <h2 class="areas__title">
+        <StrokeText text="Especialista em soluções de" height="clamp(1.9rem, 2.4vw + 1rem, 2.7rem)" />
+        <StrokeText text="" accent="dívidas fiscais" height="clamp(1.9rem, 2.4vw + 1rem, 2.7rem)" />
+      </h2>
+    </div>
 
-    <div class="areas__grid">
+    <div class="areas__grid" data-reveal>
       {practiceAreas.map((area) => <PracticeAreaCard {...area} />)}
     </div>
   </div>
@@ -66,6 +70,22 @@ const backgroundUrl = `url(${backgroundImage.src})`;
     padding-inline: var(--container-padding-x);
   }
 
+  .areas__heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .areas__eyebrow {
+    margin-bottom: 14px;
+  }
+
+  .areas__title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .areas__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -79,3 +99,4 @@ const backgroundUrl = `url(${backgroundImage.src})`;
     }
   }
 </style>
+

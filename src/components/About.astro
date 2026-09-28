@@ -1,7 +1,8 @@
 ---
 import { getImage } from 'astro:assets';
-import Accent from './ui/Accent.astro';
-import SectionHeading from './ui/SectionHeading.astro';
+import BlurText from './ui/BlurText.astro';
+import Eyebrow from './ui/Eyebrow.astro';
+import StrokeText from './ui/StrokeText.astro';
 import Indicator from './Indicator.astro';
 import background from '../assets/bg-veda-justica.png';
 import { siteInfo } from '../data/site';
@@ -9,6 +10,8 @@ import { aboutStats } from '../data/stats';
 
 const backgroundImage = await getImage({ src: background, format: 'webp', width: 2000 });
 const backgroundUrl = `url(${backgroundImage.src})`;
+const aboutIntro = `${siteInfo.name} é advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em situações de endividamento fiscal, execuções tributárias e negociações com o Fisco.`;
+const aboutApproach = `No escritório ${siteInfo.name} Advocacia, o foco está primeiro na dor do cliente — não apenas nos honorários, mas no ser humano que precisa deitar no travesseiro e ter o sono tranquilo.`;
 ---
 
 <section id="sobre" class="about">
@@ -17,20 +20,15 @@ const backgroundUrl = `url(${backgroundImage.src})`;
 
   <div class="about__inner">
     <div class="about__content">
-      <SectionHeading eyebrow="Sobre mim">
-        A advocacia tem o poder de <Accent>mudar vidas</Accent>
-      </SectionHeading>
+      <Eyebrow class="about__eyebrow">Sobre mim</Eyebrow>
+      <h2 class="about__title">
+        <StrokeText text="A advocacia tem o poder de" height="clamp(1.9rem, 2.4vw + 1rem, 2.7rem)" />
+        <StrokeText accent="mudar vidas" text="" height="clamp(1.9rem, 2.4vw + 1rem, 2.7rem)" />
+      </h2>
 
-      <p class="about__text">
-        {siteInfo.name} é advogada tributarista com atuação estratégica voltada à defesa de
-        empresários e empresas em situações de endividamento fiscal, execuções tributárias e
-        negociações com o Fisco.
-      </p>
-      <p class="about__text">
-        No escritório {siteInfo.name} Advocacia, o foco está primeiro na dor do cliente — não apenas
-        nos honorários, mas no ser humano que precisa deitar no travesseiro e ter o sono tranquilo.
-      </p>
-      <div class="about__stats">
+      <BlurText class="about__text" text={aboutIntro} />
+      <BlurText class="about__text" text={aboutApproach} />
+      <div class="about__stats" data-reveal={JSON.stringify({ direction: 'left', distance: '60px', stagger: 150, duration: 600 })}>
         {aboutStats.map((stat) => <Indicator {...stat} />)}
       </div>
     </div>
@@ -86,6 +84,17 @@ const backgroundUrl = `url(${backgroundImage.src})`;
     display: flex;
     flex-direction: column;
     gap: 6px;
+  }
+
+  .about__eyebrow {
+    margin-bottom: 14px;
+  }
+
+  .about__title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
   }
 
   .about__text {

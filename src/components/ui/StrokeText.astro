@@ -1,0 +1,304 @@
+---
+interface Props {
+  text: string;
+  accent?: string;
+  class?: string;
+  strokeColor?: string;
+  fillColor?: string;
+  accentColor?: string;
+  strokeWidth?: number;
+  drawDuration?: number;
+  fillDelay?: number;
+  stagger?: number;
+  fillMode?: 'fade' | 'wipe' | 'none';
+  trigger?: 'mount' | 'scroll' | 'hover';
+  reverse?: boolean;
+  height?: string;
+  fontSize?: number;
+  fontWeight?: number;
+  letterSpacing?: number;
+}
+
+const {
+  text,
+  accent,
+  class: className,
+  strokeColor = 'var(--gold-500)',
+  fillColor = 'var(--cream)',
+  accentColor = 'var(--gold-300)',
+  strokeWidth = 1.2,
+  drawDuration = 1.4,
+  fillDelay = 0.15,
+  stagger = 0.05,
+  fillMode = 'wipe',
+  trigger = 'scroll',
+  reverse = false,
+  height = 'clamp(3rem, 6vw, 5rem)',
+  fontSize = 128,
+  fontWeight = 600,
+  letterSpacing = 0,
+} = Astro.props;
+
+const label = accent ? `${text} ${accent}` : text;
+const mainCharacters = Array.from(text);
+const accentCharacters = accent ? Array.from(text ? ` ${accent}` : accent) : [];
+const clipId = `stroke-text-wipe-${Math.random().toString(36).slice(2, 10)}`;
+const config = { strokeWidth, drawDuration, fillDelay, stagger, fillMode, trigger, reverse };
+---
+
+<span
+  class:list={['stroke-text', className]}
+  role="img"
+  aria-label={label}
+  data-stroke-text={JSON.stringify(config)}
+>
+  <svg class="stroke-text__svg" preserveAspectRatio="xMinYMid meet" aria-hidden="true">
+    {
+      fillMode === 'wipe' && (
+        <defs>
+          <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+            <rect data-stroke-text-wipe x="0" y="0" width="0" height="0" />
+          </clipPath>
+        </defs>
+      )
+    }
+
+    <text
+      class="stroke-text__stroke"
+      data-stroke-text-measure
+      x="0"
+      y="0"
+      fill="none"
+      stroke={strokeColor}
+      stroke-width={strokeWidth}
+      stroke-linejoin="round"
+      stroke-linecap="round"
+    >
+      {mainCharacters.map((character) => <tspan data-stroke-char>{character}</tspan>)}
+      {
+        accentCharacters.map((character) => (
+          <tspan class="stroke-text__accent" data-stroke-char>
+            {character}
+          </tspan>
+        ))
+      }
+    </text>
+
+    <text
+      class="stroke-text__fill"
+      x="0"
+      y="0"
+      fill={fillColor}
+      stroke="none"
+      clip-path={fillMode === 'wipe' ? `url(#${clipId})` : undefined}
+    >
+      {mainCharacters.map((character) => <tspan data-fill-char>{character}</tspan>)}
+      {
+        accentCharacters.map((character) => (
+          <tspan class="stroke-text__accent" fill={accentColor} data-fill-char>
+            {character}
+          </tspan>
+        ))
+      }
+    </text>
+  </svg>
+</span>
+
+<style
+  define:vars={{
+    strokeTextHeight: height,
+    strokeTextFontSize: `${fontSize}px`,
+    strokeTextFontWeight: String(fontWeight),
+    strokeTextLetterSpacing: `${letterSpacing}px`,
+  }}
+>
+  .stroke-text {
+    display: block;
+    line-height: 0;
+  }
+
+  .stroke-text__svg {
+    display: block;
+    height: var(--strokeTextHeight);
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .stroke-text__stroke,
+  .stroke-text__fill {
+    font-family: var(--font-display);
+    font-size: var(--strokeTextFontSize);
+    font-weight: var(--strokeTextFontWeight);
+    letter-spacing: var(--strokeTextLetterSpacing);
+    user-select: none;
+  }
+
+  .stroke-text__accent {
+    font-style: italic;
+  }
+</style>
+
+<script>
+  interface StrokeTextConfig {
+    strokeWidth: number;
+    drawDuration: number;
+    fillDelay: number;
+    stagger: number;
+    fillMode: 'fade' | 'wipe' | 'none';
+    trigger: 'mount' | 'scroll' | 'hover';
+    reverse: boolean;
+  }
+
+  const measure = (root: HTMLElement): DOMRect | null => {
+    const svg = root.querySelector<SVGSVGElement>('.stroke-text__svg');
+    const measured = root.querySelector<SVGTextElement>('[data-stroke-text-measure]');
+    if (!svg || !measured) {
+      return null;
+    }
+
+    let box: DOMRect;
+    try {
+      box = measured.getBBox();
+    } catch {
+      return null;
+    }
+    if (!box.width) {
+      return null;
+    }
+
+    const fontSize = Number.parseFloat(getComputedStyle(measured).fontSize) || 128;
+    const pad = fontSize * 0.12;
+    const frame = new DOMRect(
+      box.x - pad,
+      -fontSize * 0.96,
+      box.width + pad * 2,
+      fontSize * 1.28
+    );
+
+    svg.setAttribute('viewBox', `${frame.x} ${frame.y} ${frame.width} ${frame.height}`);
+    svg.style.aspectRatio = `${frame.width} / ${frame.height}`;
+
+    const wipe = root.querySelector<SVGRectElement>('[data-stroke-text-wipe]');
+    if (wipe) {
+      wipe.setAttribute('x', String(frame.x));
+      wipe.setAttribute('y', String(frame.y));
+      wipe.setAttribute('width', String(frame.width));
+      wipe.setAttribute('height', String(frame.height));
+    }
+
+    return frame;
+  };
+
+  const play = (root: HTMLElement, config: StrokeTextConfig, dash: number): void => {
+    const strokes = Array.from(root.querySelectorAll<SVGTSpanElement>('[data-stroke-char]'));
+    const fills = Array.from(root.querySelectorAll<SVGTSpanElement>('[data-fill-char]'));
+    const wipe = root.querySelector<SVGRectElement>('[data-stroke-text-wipe]');
+    const useWipe = config.fillMode === 'wipe' && wipe !== null;
+    const fillEnabled = config.fillMode !== 'none';
+    const drawDuration = config.drawDuration * 1000;
+    const fillDuration = Math.max(400, drawDuration * 0.5);
+
+    strokes.forEach((stroke, index) => {
+      const position = config.reverse ? strokes.length - 1 - index : index;
+      stroke.style.strokeDasharray = String(dash);
+      stroke.animate(
+        [{ strokeDashoffset: dash }, { strokeDashoffset: 0 }],
+        {
+          duration: drawDuration,
+          delay: position * config.stagger * 1000,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
+        }
+      );
+    });
+
+    if (!fillEnabled) {
+      fills.forEach((fill) => {
+        fill.style.opacity = '0';
+      });
+      return;
+    }
+
+    const fillStart = drawDuration + config.fillDelay * 1000;
+
+    if (useWipe) {
+      wipe.style.transformBox = 'fill-box';
+      wipe.style.transformOrigin = 'left center';
+      wipe.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], {
+        duration: fillDuration,
+        delay: fillStart,
+        easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+        fill: 'both',
+      });
+      return;
+    }
+
+    fills.forEach((fill, index) => {
+      const position = config.reverse ? fills.length - 1 - index : index;
+      fill.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: fillDuration,
+        delay: fillStart + position * config.stagger * 1000,
+        easing: 'ease-out',
+        fill: 'both',
+      });
+    });
+  };
+
+  const setup = (root: HTMLElement, config: StrokeTextConfig): void => {
+    const frame = measure(root);
+    if (!frame) {
+      return;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const wipe = root.querySelector<SVGRectElement>('[data-stroke-text-wipe]');
+      if (wipe) {
+        wipe.style.transformBox = 'fill-box';
+        wipe.style.transformOrigin = 'left center';
+      }
+      return;
+    }
+
+    const dash = Math.max(frame.height * 6, 200);
+
+    if (config.trigger === 'hover') {
+      root.addEventListener('pointerenter', () => play(root, config, dash));
+      return;
+    }
+
+    if (config.trigger === 'mount') {
+      play(root, config, dash);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+          observer.disconnect();
+          play(root, config, dash);
+        });
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(root);
+  };
+
+  const start = (): void => {
+    document.querySelectorAll<HTMLElement>('[data-stroke-text]').forEach((root) => {
+      const raw = root.dataset.strokeText;
+      if (!raw) {
+        return;
+      }
+      setup(root, JSON.parse(raw) as StrokeTextConfig);
+    });
+  };
+
+  if (document.fonts?.ready) {
+    document.fonts.ready.then(start).catch(start);
+  } else {
+    start();
+  }
+</script>

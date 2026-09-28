@@ -1,0 +1,72 @@
+---
+---
+
+<script>
+  type RevealDirection = 'left' | 'right' | 'up' | 'down';
+
+  interface RevealConfig {
+    direction?: RevealDirection;
+    distance?: string;
+    duration?: number;
+    stagger?: number;
+    threshold?: number;
+  }
+
+  const offsets: Record<RevealDirection, (distance: string) => string> = {
+    left: (distance) => `translateX(-${distance})`,
+    right: (distance) => `translateX(${distance})`,
+    up: (distance) => `translateY(${distance})`,
+    down: (distance) => `translateY(-${distance})`,
+  };
+
+  const revealChildren = (container: HTMLElement, config: RevealConfig): void => {
+    const direction = config.direction ?? 'left';
+    const distance = config.distance ?? '120%';
+    const duration = config.duration ?? 700;
+    const stagger = config.stagger ?? 180;
+    const children = Array.from(container.children) as HTMLElement[];
+
+    container.removeAttribute('data-reveal-pending');
+
+    children.forEach((child, index) => {
+      child.animate(
+        [
+          { opacity: 0, transform: offsets[direction](distance) },
+          { opacity: 1, transform: 'translate(0)' },
+        ],
+        {
+          duration,
+          delay: index * stagger,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'both',
+        }
+      );
+    });
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((container) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const raw = container.dataset.reveal;
+    const config = raw ? (JSON.parse(raw) as RevealConfig) : {};
+
+    container.setAttribute('data-reveal-pending', '');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            return;
+          }
+          observer.disconnect();
+          revealChildren(container, config);
+        });
+      },
+      { threshold: config.threshold ?? 0.15 }
+    );
+
+    observer.observe(container);
+  });
+</script>
