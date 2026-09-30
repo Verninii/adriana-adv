@@ -7,11 +7,11 @@ export const siteInfo: SiteInfo = {
   logoAlt: 'Adriana Marcondes — Soluções Fiscais',
   summary:
     'Advocacia tributária dedicada à defesa de empresários e empresas em execuções fiscais, negociações com o Fisco e preservação patrimonial.',
-  role: 'Especialista em soluções tributárias',
+  role: 'Advogada Especialista em soluções tributárias',
   whatsappNumber: '5511947544718',
   whatsappMessage: 'Olá! Gostaria de agendar uma consulta sobre minha situação fiscal.',
   phone: '(11) 94754-4718',
-  email: 'amsfiscais@gmail.com',
+  email: 'marcondesadvocacia@gmail.com',
   street: 'Rua Ângelo Airoldi, 91',
   city: 'Jandira — SP',
   hours: 'Seg a sex, 8:30h às 17h',

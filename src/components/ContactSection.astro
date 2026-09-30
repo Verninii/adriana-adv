@@ -21,16 +21,17 @@ import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
 
   <div class="contact__inner">
     <div class="contact__copy">
-      <a class="contact__maps" target="_blank" rel="noopener">
+      <!-- <a class="contact__maps" target="_blank" rel="noopener">
         <GradientText animationSpeed={6}>Atendimento 100% Online</GradientText>
         <Icon name="arrow-right" size={18} />
-      </a>
+      </a> -->
       <Eyebrow class="contact__eyebrow">Agende uma consulta</Eyebrow>
       <h2 class="contact__title">
-        <StrokeText text="Fale com especialista" height="clamp(2.6rem, 4vw + 1rem, 3.6rem)" />
+        <StrokeText text="Fale com a nossa equipe" height="clamp(2.6rem, 4vw + 1rem, 3.6rem)" />
       </h2>
       <BlurText
         class="contact__text"
+        maxWidth="45ch"
         text="Explique a sua situação fiscal e receba o retorno com sigilo e atenção individual. O atendimento é on-line para todo o Brasil."
       />
       <div
@@ -135,7 +136,6 @@ import { mapEmbedUrl, mapsUrl, siteInfo } from "../data/site";
   }
 
   .contact__text {
-    max-width: 42ch;
     color: var(--cream-dim);
     margin: 0 0 24px;
   }

@@ -3,10 +3,10 @@ interface Props {
   class?: string;
 }
 
-const { class: className } = Astro.props;
+const { class: className, ...rest } = Astro.props;
 ---
 
-<span class:list={['eyebrow', className]}><slot /></span>
+<span class:list={['eyebrow', className]} {...rest}><slot /></span>
 
 <style>
   .eyebrow {

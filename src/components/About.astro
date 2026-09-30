@@ -25,7 +25,7 @@ const aboutIntro = `${siteInfo.name} é advogada tributarista com atuação estr
         <StrokeText accent="mudar vidas" text="" height="clamp(1.9rem, 2.4vw + 1rem, 2.7rem)" />
       </h2>
 
-      <BlurText class="about__text" maxWidth='65%' text={aboutIntro} />
+      <BlurText class="about__text" maxWidth="45ch" text={aboutIntro} />
       <div class="about__stats" data-reveal={JSON.stringify({ direction: 'left', distance: '60px', stagger: 150, duration: 600 })}>
         {aboutStats.map((stat) => <Indicator {...stat} />)}
       </div>
@@ -92,7 +92,8 @@ const aboutIntro = `${siteInfo.name} é advogada tributarista com atuação estr
   }
 
   .about__text {
-    font-size: 1.06rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
     color: var(--cream-dim);
     margin: 18px 0 0;
   }

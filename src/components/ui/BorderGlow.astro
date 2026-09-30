@@ -25,6 +25,7 @@ const {
   animated = false,
   colors = ['#e3cf94', '#c9a24a', '#a9803a'],
   fillOpacity = 0.5,
+  ...rest
 } = Astro.props;
 
 const parseHsl = (value: string): { hue: number; saturation: number; lightness: number } => {
@@ -109,6 +110,7 @@ const style = Object.entries(styleVars)
 
 <div
   class:list={['border-glow-card', className]}
+  {...rest}
   style={style}
   data-border-glow
   data-border-glow-animated={animated ? 'true' : undefined}

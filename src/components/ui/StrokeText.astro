@@ -37,6 +37,7 @@ const {
   fontSize = 128,
   fontWeight = 600,
   letterSpacing = 0,
+  ...rest
 } = Astro.props;
 
 const label = accent ? `${text} ${accent}` : text;
@@ -48,6 +49,7 @@ const config = { strokeWidth, drawDuration, fillDelay, stagger, fillMode, trigge
 
 <span
   class:list={['stroke-text', className]}
+  {...rest}
   role="img"
   aria-label={label}
   data-stroke-text={JSON.stringify(config)}

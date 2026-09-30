@@ -15,6 +15,7 @@ const {
   direction = 'horizontal',
   pauseOnHover = false,
   yoyo = true,
+  ...rest
 } = Astro.props;
 
 const gradientAngle =
@@ -28,6 +29,7 @@ const animationName = direction === 'vertical' ? 'gradient-text-vertical' : 'gra
 
 <span
   class:list={['gradient-text', { 'gradient-text--pause': pauseOnHover }, className]}
+  {...rest}
   data-gradient-text
 >
   <slot />

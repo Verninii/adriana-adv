@@ -21,13 +21,14 @@ const {
   threshold = 0.1,
   rootMargin = '0px',
   maxWidth = 'none',
+  ...rest
 } = Astro.props;
 
 const segments = animateBy === 'words' ? text.split(' ') : Array.from(text);
 const config = { animateBy, direction, delay, stepDuration, threshold, rootMargin };
 ---
 
-<p class:list={['blur-text', className]} data-blur-text={JSON.stringify(config)}>
+<p class:list={['blur-text', className]} data-blur-text={JSON.stringify(config)} {...rest}>
   {
     segments.map((segment, index) => (
       <span class="blur-text__segment">
