@@ -14,6 +14,7 @@ export interface NavLink {
 
 export interface SiteInfo {
   name: string;
+  nameFooter: string;
   tagline: string;
   summary: string;
   logoAlt: string;

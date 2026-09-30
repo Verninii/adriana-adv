@@ -1,7 +1,8 @@
 import type { NavLink, SiteInfo, SocialLink } from '../types/content';
 
 export const siteInfo: SiteInfo = {
-  name: 'Dra. Adriana Marcondes',
+  name: 'Adriana Marcondes',
+  nameFooter: 'Dra. Adriana Marcondes',
   tagline: 'Soluções Fiscais',
   logoAlt: 'Adriana Marcondes — Soluções Fiscais',
   summary:
