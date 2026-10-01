@@ -38,11 +38,15 @@ const backgroundUrl = `url(${backgroundImage.src})`;
 
   .areas__backdrop {
     position: absolute;
-    inset: -12px;
+    top: -12px;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-30%);
+    width: min(calc(100% + 24px), var(--container-outer-max));
     z-index: -2;
     background-image: var(--backgroundUrl);
-    background-size: cover;
-    background-position: center right;
+    background-size: auto 100%;
+    background-position: right center;
     background-repeat: no-repeat;
     filter: blur(1.5px);
   }

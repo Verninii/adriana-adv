@@ -46,7 +46,7 @@ const nameParts = siteInfo.name.split(' ');
     overflow: hidden;
     display: flex;
     align-items: center;
-    min-height: 740px;
+    min-height: clamp(740px, 46vw, 980px);
     padding-block: 72px 88px;
     background-color: var(--navy-950);
   }
@@ -57,7 +57,7 @@ const nameParts = siteInfo.name.split(' ');
     z-index: -2;
     background-image: var(--backgroundUrl);
     background-size: cover;
-    background-position: center right;
+    background-position: right top;
     background-repeat: no-repeat;
   }
 

@@ -45,11 +45,15 @@ const aboutIntro = `${siteInfo.name} é advogada tributarista com atuação estr
 
   .about__backdrop {
     position: absolute;
-    inset: -12px;
+    top: -12px;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-65%);
+    width: min(calc(100% + 24px), var(--container-outer-max));
     z-index: -2;
     background-image: var(--backgroundUrl);
-    background-size: cover;
-    background-position: center left;
+    background-size: auto 100%;
+    background-position: left center;
     background-repeat: no-repeat;
     filter: blur(1.5px);
   }
