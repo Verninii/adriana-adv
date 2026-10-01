@@ -2,22 +2,71 @@
 interface Props {
   href?: string;
   type?: 'button' | 'submit';
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'animated' | 'galaxy';
   external?: boolean;
+  class?: string;
 }
 
-const { href, type = 'button', variant = 'primary', external = false } = Astro.props;
+const { href, type = 'button', variant = 'primary', external = false, class: className, ...rest } = Astro.props;
 const Tag = href ? 'a' : 'button';
+
+const randomBetween = (min: number, max: number): number =>
+  Math.floor(Math.random() * (max - min + 1) + min);
+
+const createStar = () => ({
+  duration: randomBetween(6, 20),
+  delay: randomBetween(1, 10),
+  alpha: randomBetween(40, 90) / 100,
+  size: randomBetween(2, 5),
+  distance: randomBetween(30, 120),
+});
+
+const orbitStars = variant === 'galaxy' ? Array.from({ length: 20 }, createStar) : [];
+const staticStars = variant === 'galaxy' ? Array.from({ length: 4 }, createStar) : [];
+
+const starStyle = (star: ReturnType<typeof createStar>): string =>
+  `--duration:${star.duration};--delay:${star.delay};--alpha:${star.alpha};--size:${star.size};--distance:${star.distance}`;
 ---
 
 <Tag
-  class:list={['button', `button--${variant}`]}
+  class:list={['button', `button--${variant}`, className]}
   href={href}
   type={href ? undefined : type}
   target={external ? '_blank' : undefined}
   rel={external ? 'noopener' : undefined}
+  {...rest}
 >
-  <slot />
+  {
+    variant === 'animated' && (
+      <>
+        <span class="button__edge button__edge--top" aria-hidden="true" />
+        <span class="button__edge button__edge--right" aria-hidden="true" />
+        <span class="button__edge button__edge--bottom" aria-hidden="true" />
+        <span class="button__edge button__edge--left" aria-hidden="true" />
+      </>
+    )
+  }
+  {
+    variant === 'galaxy' && (
+      <>
+        <span class="spark" aria-hidden="true" />
+        <span class="backdrop" aria-hidden="true" />
+        <span class="galaxy__container" aria-hidden="true">
+          {staticStars.map((star) => (
+            <span class="star star--static" style={starStyle(star)} />
+          ))}
+        </span>
+        <span class="galaxy" aria-hidden="true">
+          <span class="galaxy__ring">
+            {orbitStars.map((star) => (
+              <span class="star" style={starStyle(star)} />
+            ))}
+          </span>
+        </span>
+      </>
+    )
+  }
+  <span class="button__label"><slot /></span>
 </Tag>
 
 <style>
@@ -48,6 +97,11 @@ const Tag = href ? 'a' : 'button';
     outline-offset: 3px;
   }
 
+  .button__label {
+    position: relative;
+    z-index: 1;
+  }
+
   .button--primary {
     background: linear-gradient(135deg, var(--gold-300), var(--gold-600));
     color: var(--navy-950);
@@ -70,9 +124,313 @@ const Tag = href ? 'a' : 'button';
     color: var(--gold-300);
   }
 
+  .button--animated {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(-30deg, var(--navy-800) 50%, var(--navy-900) 50%);
+    border-color: var(--rule);
+    color: var(--cream);
+    box-shadow: var(--shadow);
+  }
+
+  .button--animated::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold-500);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .button--animated:hover {
+    color: var(--gold-300);
+  }
+
+  .button--animated:hover::before {
+    opacity: 0.18;
+  }
+
+  .button__edge {
+    position: absolute;
+  }
+
+  .button__edge--top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to left, var(--gold-clear), var(--gold-300));
+    animation: button-edge-top 2s linear infinite;
+  }
+
+  .button__edge--right {
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to top, var(--gold-clear), var(--gold-300));
+    animation: button-edge-right 2s linear -1s infinite;
+  }
+
+  .button__edge--bottom {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, var(--gold-clear), var(--gold-300));
+    animation: button-edge-bottom 2s linear infinite;
+  }
+
+  .button__edge--left {
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--gold-clear), var(--gold-300));
+    animation: button-edge-left 2s linear -1s infinite;
+  }
+
+  @keyframes button-edge-top {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes button-edge-right {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes button-edge-bottom {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes button-edge-left {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  .button--galaxy {
+    --active: 0;
+    --cut: 1px;
+    --galaxy-transition: 0.25s;
+    --galaxy-spark: 1.8s;
+    --galaxy-bg:
+      radial-gradient(
+          120% 120% at 126% 126%,
+          rgba(243, 233, 205, calc(var(--active) * 0.9)) 40%,
+          transparent 50%
+        )
+        calc(100px - (var(--active) * 100px)) 0 / 100% 100% no-repeat,
+      radial-gradient(
+          120% 120% at 120% 120%,
+          rgba(201, 162, 74, calc(var(--active) * 0.85)) 30%,
+          transparent 70%
+        )
+        calc(100px - (var(--active) * 100px)) 0 / 100% 100% no-repeat,
+      var(--navy-900);
+
+    position: relative;
+    overflow: hidden;
+    background: var(--galaxy-bg);
+    border-color: var(--rule);
+    color: var(--cream);
+    transform-style: preserve-3d;
+    perspective: 100vmin;
+    box-shadow:
+      0 0 calc(var(--active) * 3em) calc(var(--active) * 1em) rgba(201, 162, 74, 0.45),
+      0 0.05em 0 0 rgba(243, 233, 205, calc(var(--active) * 0.5)) inset,
+      0 -0.05em 0 0 rgba(6, 15, 28, calc(var(--active) * 0.6)) inset;
+    scale: calc(1 + (var(--active) * 0.04));
+    transition:
+      box-shadow var(--galaxy-transition),
+      scale var(--galaxy-transition),
+      background var(--galaxy-transition),
+      color var(--galaxy-transition);
+  }
+
+  .button--galaxy:is(:hover, :focus-visible) {
+    --active: 1;
+    color: var(--gold-100);
+  }
+
+  .button--galaxy:active {
+    scale: 1;
+  }
+
+  .button--galaxy .button__label {
+    position: relative;
+    z-index: 2;
+  }
+
+  .spark {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    rotate: 0deg;
+    overflow: hidden;
+    mask: linear-gradient(white, transparent 50%);
+    -webkit-mask: linear-gradient(white, transparent 50%);
+    animation: galaxy-flip calc(var(--galaxy-spark) * 2) infinite steps(2, end);
+  }
+
+  .spark::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    aspect-ratio: 1;
+    top: 0;
+    left: 50%;
+    z-index: -1;
+    translate: -50% -15%;
+    transform: rotate(-90deg);
+    opacity: calc(var(--active) + 0.35);
+    background: conic-gradient(from 0deg, transparent 0 340deg, var(--gold-300) 360deg);
+    transition: opacity var(--galaxy-transition);
+    animation: galaxy-rotate var(--galaxy-spark) linear infinite both;
+  }
+
+  .spark::after {
+    content: '';
+    position: absolute;
+    inset: var(--cut);
+    border-radius: inherit;
+  }
+
+  .backdrop {
+    position: absolute;
+    inset: var(--cut);
+    background: var(--galaxy-bg);
+    border-radius: inherit;
+    transition: background var(--galaxy-transition);
+  }
+
+  .galaxy {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    overflow: hidden;
+    opacity: var(--active);
+    transition: opacity var(--galaxy-transition);
+  }
+
+  .galaxy__ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    border-radius: 50%;
+    transform: translate(-28%, -40%) rotateX(-24deg) rotateY(-30deg) rotateX(90deg);
+    transform-style: preserve-3d;
+  }
+
+  .galaxy__container {
+    position: absolute;
+    inset: 0;
+    opacity: var(--active);
+    transition: opacity var(--galaxy-transition);
+    mask: radial-gradient(white, transparent);
+    -webkit-mask: radial-gradient(white, transparent);
+  }
+
+  .star {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: calc(var(--size) * 1px);
+    aspect-ratio: 1;
+    background: var(--gold-100);
+    border-radius: 50%;
+    opacity: var(--alpha);
+    transform: translate(-50%, -50%) rotate(10deg) rotate(0deg)
+      translateY(calc(var(--distance) * 1px));
+    animation: galaxy-orbit calc(var(--duration) * 1s) calc(var(--delay) * -1s) infinite linear;
+  }
+
+  .star--static {
+    top: 50%;
+    left: 50%;
+    max-height: 3px;
+    filter: brightness(2);
+    opacity: 0.9;
+    transform: translate(0, 0);
+    animation:
+      galaxy-move-x calc(var(--duration) * 0.1s) calc(var(--delay) * -0.1s) infinite linear,
+      galaxy-move-y calc(var(--duration) * 0.2s) calc(var(--delay) * -0.2s) infinite linear;
+  }
+
+  .button--galaxy:hover .star--static {
+    animation-play-state: paused;
+  }
+
+  @keyframes galaxy-orbit {
+    to {
+      transform: translate(-50%, -50%) rotate(10deg) rotate(360deg)
+        translateY(calc(var(--distance) * 1px));
+    }
+  }
+
+  @keyframes galaxy-flip {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @keyframes galaxy-rotate {
+    to {
+      transform: rotate(90deg);
+    }
+  }
+
+  @keyframes galaxy-move-x {
+    from {
+      translate: -60px 0;
+    }
+    to {
+      translate: 60px 0;
+    }
+  }
+
+  @keyframes galaxy-move-y {
+    from {
+      transform: translate(0, -30px);
+    }
+    to {
+      transform: translate(0, 30px);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .button {
       transition: none;
+    }
+
+    .button__edge,
+    .spark,
+    .spark::before,
+    .star,
+    .star--static {
+      animation: none;
     }
   }
 </style>
