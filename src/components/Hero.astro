@@ -25,12 +25,13 @@ const nameParts = siteInfo.name.split(' ');
           ))
         }
       </h1>
-      <p class="hero__role">{siteInfo.role}</p>
-      <BlurText
-        class="hero__lede"
-        maxWidth="70%"
-        text="Advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em situações de endividamento fiscal, execuções tributárias e negociações com o Fisco."
-      />
+      <div>
+        <p class="hero__role">{siteInfo.role}</p>
+        <BlurText
+          class="hero__lede"
+          text="Advogada tributarista com atuação estratégica voltada à defesa de empresários e empresas em situações de endividamento fiscal, execuções tributárias e negociações com o Fisco."
+        />
+      </div>
       <div class="hero__actions" data-reveal={JSON.stringify({ direction: 'up', distance: '40px', stagger: 160, duration: 600 })}>
         <Button href={whatsappUrl} external>Falar no WhatsApp</Button>
         <Button href="#atuacao" variant="secondary">Áreas de atuação</Button>
@@ -115,10 +116,17 @@ const nameParts = siteInfo.name.split(' ');
   }
 
   .hero__lede {
-    max-width: 42ch;
+    width: 0;
+    min-width: 100%;
     font-size: 1.1rem;
     color: var(--cream-dim);
     margin: 0 0 32px;
+    justify-content: space-between;
+  }
+
+  .hero__lede::after {
+    content: '';
+    flex: auto;
   }
 
   .hero__actions {

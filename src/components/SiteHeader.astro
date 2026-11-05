@@ -9,18 +9,16 @@ import { navLinks, whatsappUrl } from '../data/site';
     <a href="#inicio" class="header__brand">
       <Logo class="header__logo" loading="eager" />
     </a>
-    <div class="header__actions">
-      <nav class="header__nav" aria-label="Navegação principal">
-        {
-          navLinks.map((link) => (
-            <a href={link.href} class="header__link">
-              {link.label}
-            </a>
-          ))
-        }
-      </nav>
-      <Button href={whatsappUrl} external variant="galaxy">Entre em contato</Button>
-    </div>
+    <nav class="header__nav" aria-label="Navegação principal">
+      {
+        navLinks.map((link) => (
+          <a href={link.href} class="header__link">
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+    <Button href={whatsappUrl} external variant="galaxy">Entre em contato</Button>
   </div>
 </header>
 
@@ -53,11 +51,6 @@ import { navLinks, whatsappUrl } from '../data/site';
   .header__logo {
     width: auto;
     height: 70px;
-  }
-
-  .header__actions {
-    display: flex;
-    align-items: center;
   }
 
   .header__nav {

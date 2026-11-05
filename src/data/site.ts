@@ -11,7 +11,7 @@ export const siteInfo: SiteInfo = {
   whatsappNumber: '5511947544718',
   whatsappMessage: 'Olá! Gostaria de agendar uma consulta sobre minha situação fiscal.',
   phone: '(11) 94754-4718',
-  email: 'marcondesadvocacia@gmail.com',
+  email: 'marcondesadvocacia26@gmail.com',
   street: 'Rua Ângelo Airoldi, 91',
   city: 'Jandira — SP',
   hours: 'Seg a sex, 8:30h às 17h',
@@ -33,6 +33,6 @@ export const navLinks: readonly NavLink[] = [
 ];
 
 export const socialLinks: readonly SocialLink[] = [
-  { label: 'Instagram', href: 'https://www.instagram.com/amsfiscais', icon: 'instagram' },
+  { label: 'Instagram', href: 'https://www.instagram.com/marcondesadvocacia26', icon: 'instagram' },
   { label: 'WhatsApp', href: whatsappUrl, icon: 'whatsapp' },
 ];
