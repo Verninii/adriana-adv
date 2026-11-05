@@ -139,11 +139,14 @@ const nameParts = siteInfo.name.split(' ');
     .hero {
       align-items: flex-end;
       min-height: 620px;
-      padding-block: clamp(100px, 30vh, 460px) 30px;
+      padding-block: 340px 30px;
     }
 
     .hero__backdrop {
+      bottom: auto;
+      height: 600px;
       background-position: 86% center;
+      mask-image: linear-gradient(to bottom, #000 70%, transparent);
     }
 
     .hero__overlay {
